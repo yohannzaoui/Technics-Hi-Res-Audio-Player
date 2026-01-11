@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740</title>
+    <title>Technics SL-PS 740 - Advanced Controls</title>
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
     <style>
         :root {
@@ -19,7 +19,7 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -50,7 +50,6 @@
             justify-content: space-around;
         }
 
-        /* Police standard pour les fonctions */
         .status-line {
             color: var(--vfd-green);
             font-family: -apple-system, sans-serif;
@@ -59,16 +58,13 @@
             letter-spacing: 2px;
             height: 1.2rem;
             text-transform: uppercase;
-            opacity: 0.9;
         }
 
         .time-wrapper {
             position: relative;
             display: inline-block;
-            margin: 5px 0;
         }
 
-        /* DS-Digital UNIQUEMENT pour le compteur */
         .time-ghost {
             position: absolute;
             top: 0; left: 0; right: 0;
@@ -115,21 +111,26 @@
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
+            margin-bottom: 10px;
         }
 
         button {
             background: #1e1e1e;
             border: 1px solid #333;
             color: #ddd;
-            padding: 15px 5px;
-            font-size: 0.7rem;
+            padding: 12px 5px;
+            font-size: 0.65rem;
             font-weight: bold;
             cursor: pointer;
             text-transform: uppercase;
+            transition: all 0.1s;
         }
 
+        button:active { background: #333; color: var(--vfd-green); }
+        button.active { color: var(--vfd-green); border-color: var(--vfd-green); }
+
         .shuttle-zone {
-            margin-top: 25px;
+            margin-top: 15px;
             background: #0a0a0a;
             padding: 15px;
         }
@@ -187,7 +188,7 @@
         <div id="file-name" class="track-name-display">- - - - -</div>
     </div>
 
-    <div class="vfd-vu-box">
+    <div class="vfd-vu-box" id="vu-container">
         <canvas id="vu-meter"></canvas>
     </div>
 
@@ -196,10 +197,20 @@
         <button onclick="handlePause()">Pause</button>
         <button onclick="handleStop()">Stop</button>
         <button onclick="toggleTime()">Time</button>
+    </div>
+    
+    <div class="controls-grid">
         <button onclick="runAutoCue()">Auto Cue</button>
         <button onclick="runPeak()">Peak</button>
         <button onclick="skip(-10)">-10s</button>
         <button onclick="skip(10)">+10s</button>
+    </div>
+
+    <div class="controls-grid">
+        <button id="btn-shuffle" onclick="toggleShuffle()">Shuffle</button>
+        <button id="btn-repeat" onclick="toggleRepeat()">Repeat</button>
+        <button onclick="toggleVUMode()">VU</button>
+        <button onclick="showCover()">Cover</button>
     </div>
 
     <div class="shuttle-zone">
@@ -211,7 +222,7 @@
         LOAD AUDIO FILE
     </div>
     
-    <input type="file" id="file-in" style="display:none" accept="audio/*, .mp3, .m4a, .wav, .flac, .mp4">
+    <input type="file" id="file-in" style="display:none" accept="audio/*">
 </div>
 
 <audio id="audio" crossorigin="anonymous" playsinline></audio>
@@ -227,6 +238,9 @@
 
     let audioCtx, analyser, dataArray, timeMode = 'elapsed';
     let lastVolume = 0;
+    let isRepeat = false;
+    let isShuffle = false;
+    let vuVisible = true;
 
     document.getElementById('load-box').onclick = () => fileIn.click();
 
@@ -261,6 +275,30 @@
     function skip(v) { audio.currentTime += v; }
     function toggleTime() { timeMode = (timeMode === 'elapsed' ? 'remaining' : 'elapsed'); }
 
+    // Toggle Functions
+    function toggleRepeat() {
+        isRepeat = !isRepeat;
+        audio.loop = isRepeat;
+        document.getElementById('btn-repeat').classList.toggle('active', isRepeat);
+        statusFunc.innerText = isRepeat ? "REPEAT ON" : "REPEAT OFF";
+    }
+
+    function toggleShuffle() {
+        isShuffle = !isShuffle;
+        document.getElementById('btn-shuffle').classList.toggle('active', isShuffle);
+        statusFunc.innerText = isShuffle ? "SHUFFLE ON" : "SHUFFLE OFF";
+    }
+
+    function toggleVUMode() {
+        vuVisible = !vuVisible;
+        document.getElementById('vu-container').style.opacity = vuVisible ? "1" : "0.1";
+        statusFunc.innerText = vuVisible ? "VU METER ON" : "VU METER OFF";
+    }
+
+    function showCover() {
+        statusFunc.innerText = "NO COVER ART";
+    }
+
     audio.ontimeupdate = () => {
         let t = (timeMode === 'remaining' && audio.duration) ? (audio.duration - audio.currentTime) : audio.currentTime;
         if (isNaN(t) || t < 0) t = 0;
@@ -280,11 +318,7 @@
 
     function resetShuttle() {
         document.getElementById('shuttle').value = 0;
-        if (audio.src) {
-            statusFunc.innerText = audio.paused ? "PAUSE" : "PLAYING";
-        } else {
-            statusFunc.innerText = "READY";
-        }
+        if (audio.src) statusFunc.innerText = audio.paused ? "PAUSE" : "PLAYING";
     }
 
     async function runPeak() {
@@ -302,9 +336,7 @@
         audio.currentTime = idx / decoded.sampleRate;
         audio.play();
         statusFunc.innerText = "PEAK FOUND";
-        setTimeout(() => { 
-            statusFunc.innerText = audio.paused ? "PAUSE" : "PLAYING";
-        }, 2500);
+        setTimeout(() => { statusFunc.innerText = audio.paused ? "PAUSE" : "PLAYING"; }, 2500);
     }
 
     function drawVU() {
@@ -314,7 +346,6 @@
         let sum = 0;
         for(let i = 0; i < 20; i++) sum += dataArray[i];
         let currentVol = sum / 20;
-
         if (currentVol < lastVolume) { lastVolume -= 0.5; } 
         else { lastVolume = currentVol; }
         
@@ -336,9 +367,6 @@
                 ctx.fillRect(i * (segW + gap), y, segW, 12);
             }
         }
-        ctx.fillStyle = "#333";
-        ctx.font = "8px monospace";
-        ctx.fillText("-20 -10 -7 -5 -3 -1 0 +3 dB", 5, 52);
     }
 </script>
 </body>
