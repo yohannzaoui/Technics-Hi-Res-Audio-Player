@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740 - Fixed Loader</title>
+    <title>Technics SL-PS 740 - Refined VFD</title>
     <style>
         :root {
             --bg-color: #080808;
@@ -108,27 +108,15 @@
             cursor: pointer;
         }
 
-        /* Amélioration de la zone de clic pour iPad */
         .file-zone {
             margin-top: 15px;
             padding: 20px;
-            border: 2px dashed #333;
+            border: 1px solid #222;
             text-align: center;
             font-size: 0.85rem;
-            color: var(--vfd-green);
+            color: #444;
             background: #0a0a0a;
             cursor: pointer;
-        }
-
-        .reset-btn {
-            display: block;
-            width: 100%;
-            margin-top: 10px;
-            background: transparent;
-            border: none;
-            color: #333;
-            font-size: 0.6rem;
-            text-decoration: underline;
         }
     </style>
 </head>
@@ -166,13 +154,10 @@
     </div>
 
     <div class="file-zone" id="load-box">
-        TAP HERE TO LOAD FILE<br>
-        <span style="font-size: 0.6rem; opacity: 0.6;">(MP3, WAV, FLAC, M4A)</span>
+        LOAD AUDIO FILE
     </div>
     
     <input type="file" id="file-in" style="display:none" accept="audio/*, .mp3, .m4a, .wav, .flac, .mp4">
-    
-    <button class="reset-btn" onclick="location.reload()">Reload application if blocked</button>
 </div>
 
 <audio id="audio" crossorigin="anonymous" playsinline></audio>
@@ -189,20 +174,14 @@
     let audioCtx, analyser, dataArray, timeMode = 'elapsed';
     let lastVolume = 0;
 
-    // Fix iPad : Déclenchement propre
     loadBox.onclick = () => fileIn.click();
 
     fileIn.onchange = (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Nettoyage de l'ancienne URL pour libérer la mémoire
             if (audio.src) URL.revokeObjectURL(audio.src);
-            
-            const url = URL.createObjectURL(file);
-            audio.src = url;
+            audio.src = URL.createObjectURL(file);
             statusDisp.innerText = file.name.toUpperCase().substring(0, 30);
-            
-            // Forcer le chargement sur Safari
             audio.load();
         }
     };
@@ -224,13 +203,8 @@
     function handlePlay() { 
         if(audio.src){ 
             initAudio(); 
-            audio.play().catch(e => {
-                statusDisp.innerText = "TAP PLAY AGAIN";
-                console.error(e);
-            }); 
+            audio.play(); 
             statusDisp.innerText = "PLAYING"; 
-        } else {
-            statusDisp.innerText = "LOAD FILE FIRST";
         }
     }
 
@@ -254,22 +228,18 @@
         if (!audio.src) return;
         initAudio();
         statusDisp.innerText = "SCANNING...";
-        try {
-            const res = await fetch(audio.src);
-            const buf = await res.arrayBuffer();
-            const decoded = await audioCtx.decodeAudioData(buf);
-            const data = decoded.getChannelData(0);
-            let max = 0, idx = 0;
-            for(let i=0; i < data.length; i+=300) { 
-                if(Math.abs(data[i]) > max) { max = Math.abs(data[i]); idx = i; }
-            }
-            audio.currentTime = idx / decoded.sampleRate;
-            audio.play();
-            statusDisp.innerText = "PEAK LEVEL";
-            setTimeout(() => audio.pause(), 2000);
-        } catch(e) {
-            statusDisp.innerText = "PEAK ERROR";
+        const res = await fetch(audio.src);
+        const buf = await res.arrayBuffer();
+        const decoded = await audioCtx.decodeAudioData(buf);
+        const data = decoded.getChannelData(0);
+        let max = 0, idx = 0;
+        for(let i=0; i < data.length; i+=400) { 
+            if(Math.abs(data[i]) > max) { max = Math.abs(data[i]); idx = i; }
         }
+        audio.currentTime = idx / decoded.sampleRate;
+        audio.play();
+        statusDisp.innerText = "PEAK LEVEL";
+        setTimeout(() => audio.pause(), 2000);
     }
 
     function drawVU() {
@@ -281,9 +251,9 @@
         for(let i = 0; i < 30; i++) sum += dataArray[i];
         let currentVol = sum / 30;
 
-        // Amortissement doux style VFD Technics
+        // Amortissement plus lent pour réduire la sensibilité (Inertie VFD)
         if (currentVol < lastVolume) {
-            lastVolume -= 1.8; 
+            lastVolume -= 1.2; 
         } else {
             lastVolume = currentVol;
         }
@@ -297,11 +267,12 @@
 
         for(let ch = 0; ch < 2; ch++) {
             let y = (ch === 0) ? 10 : 30;
-            let level = (ch === 0) ? lastVolume : lastVolume * (0.96 + Math.random()*0.08);
+            // Sensibilité réduite ici (multiplicateur de seuil)
+            let level = (ch === 0) ? lastVolume : lastVolume * (0.97 + Math.random()*0.06);
 
             for(let i = 0; i < segments; i++) {
-                let threshold = (i / segments) * 180;
-                if (level > threshold && level > 5) {
+                let threshold = (i / segments) * 210; // Seuil augmenté pour moins de sensibilité
+                if (level > threshold && level > 8) {
                     if (i > 18) ctx.fillStyle = "#ff3333";
                     else if (i > 15) ctx.fillStyle = "#ff9d00";
                     else ctx.fillStyle = "#24ff8a";
