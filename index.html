@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740 - Refined VFD</title>
+    <title>Technics SL-PS 740 - Final UI</title>
     <style>
         :root {
             --bg-color: #080808;
@@ -42,6 +42,10 @@
             border: 2px solid #1a1a1a;
             margin-bottom: 10px;
             text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .time-display {
@@ -49,7 +53,21 @@
             font-family: 'Courier New', monospace;
             font-size: 3.5rem;
             font-weight: bold;
+            line-height: 1;
             text-shadow: 0 0 12px rgba(36, 255, 138, 0.3);
+        }
+
+        .track-name-display {
+            color: var(--vfd-green);
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            margin-top: 10px;
+            letter-spacing: 1px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            opacity: 0.8;
+            text-transform: uppercase;
         }
 
         .vfd-vu-box {
@@ -129,8 +147,8 @@
     </div>
 
     <div class="display-panel">
-        <div id="status" style="color:var(--vfd-green); font-size:0.75rem; font-family:monospace; margin-bottom:5px;">READY</div>
         <div id="timer" class="time-display">00:00</div>
+        <div id="status" class="track-name-display">NO DISC</div>
     </div>
 
     <div class="vfd-vu-box">
@@ -181,7 +199,7 @@
         if (file) {
             if (audio.src) URL.revokeObjectURL(audio.src);
             audio.src = URL.createObjectURL(file);
-            statusDisp.innerText = file.name.toUpperCase().substring(0, 30);
+            statusDisp.innerText = file.name.toUpperCase();
             audio.load();
         }
     };
@@ -200,16 +218,9 @@
         if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    function handlePlay() { 
-        if(audio.src){ 
-            initAudio(); 
-            audio.play(); 
-            statusDisp.innerText = "PLAYING"; 
-        }
-    }
-
-    function handlePause() { audio.pause(); statusDisp.innerText = "PAUSED"; }
-    function handleStop() { audio.pause(); audio.currentTime = 0; statusDisp.innerText = "STOPPED"; }
+    function handlePlay() { if(audio.src){ initAudio(); audio.play(); }}
+    function handlePause() { audio.pause(); }
+    function handleStop() { audio.pause(); audio.currentTime = 0; }
     function skip(v) { audio.currentTime += v; }
     function toggleTime() { timeMode = (timeMode === 'elapsed' ? 'remaining' : 'elapsed'); }
 
@@ -221,24 +232,23 @@
         timer.innerText = `${m}:${s}`;
     };
 
-    function runAutoCue() { audio.currentTime = 0; audio.pause(); statusDisp.innerText = "AUTO CUE"; }
+    function runAutoCue() { audio.currentTime = 0; audio.pause(); }
     function doShuttle(v) { if(v != 0) audio.currentTime += (v * 0.4); }
 
     async function runPeak() {
         if (!audio.src) return;
         initAudio();
-        statusDisp.innerText = "SCANNING...";
+        statusDisp.innerText = "SCANNING PEAK...";
         const res = await fetch(audio.src);
         const buf = await res.arrayBuffer();
         const decoded = await audioCtx.decodeAudioData(buf);
         const data = decoded.getChannelData(0);
         let max = 0, idx = 0;
-        for(let i=0; i < data.length; i+=400) { 
+        for(let i=0; i < data.length; i+=500) { 
             if(Math.abs(data[i]) > max) { max = Math.abs(data[i]); idx = i; }
         }
         audio.currentTime = idx / decoded.sampleRate;
         audio.play();
-        statusDisp.innerText = "PEAK LEVEL";
         setTimeout(() => audio.pause(), 2000);
     }
 
@@ -248,12 +258,12 @@
         analyser.getByteFrequencyData(dataArray);
 
         let sum = 0;
-        for(let i = 0; i < 30; i++) sum += dataArray[i];
-        let currentVol = sum / 30;
+        for(let i = 0; i < 20; i++) sum += dataArray[i];
+        let currentVol = sum / 20;
 
-        // Amortissement plus lent pour réduire la sensibilité (Inertie VFD)
+        // Amortissement TRÈS lent (lastVolume -= 0.6) pour un effet de lissage maximum
         if (currentVol < lastVolume) {
-            lastVolume -= 1.2; 
+            lastVolume -= 0.6; 
         } else {
             lastVolume = currentVol;
         }
@@ -267,12 +277,12 @@
 
         for(let ch = 0; ch < 2; ch++) {
             let y = (ch === 0) ? 10 : 30;
-            // Sensibilité réduite ici (multiplicateur de seuil)
-            let level = (ch === 0) ? lastVolume : lastVolume * (0.97 + Math.random()*0.06);
+            let level = (ch === 0) ? lastVolume : lastVolume * (0.98 + Math.random()*0.04);
 
             for(let i = 0; i < segments; i++) {
-                let threshold = (i / segments) * 210; // Seuil augmenté pour moins de sensibilité
-                if (level > threshold && level > 8) {
+                // Seuil de déclenchement relevé (260) pour baisser radicalement la sensibilité
+                let threshold = (i / segments) * 260; 
+                if (level > threshold && level > 12) {
                     if (i > 18) ctx.fillStyle = "#ff3333";
                     else if (i > 15) ctx.fillStyle = "#ff9d00";
                     else ctx.fillStyle = "#24ff8a";
