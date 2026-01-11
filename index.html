@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740 - Multi-Track</title>
+    <title>Technics SL-PS 740 - Track Matrix</title>
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
     <style>
         :root {
             --bg-color: #080808;
             --panel-color: #141414;
             --vfd-green: #24ff8a;
+            --vfd-green-dim: rgba(36, 255, 138, 0.2);
             --vfd-dim: rgba(36, 255, 138, 0.05);
             --vfd-orange: #ff9d00;
             --vfd-red: #ff3333;
@@ -101,33 +102,36 @@
 
         .ind.active { color: var(--vfd-green); text-shadow: 0 0 8px var(--vfd-green); }
 
-        /* Grille des pistes */
         .track-grid {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 12px;
             margin-top: 10px;
-            min-height: 20px;
+            min-height: 25px;
+            padding: 5px;
         }
 
         .track-num {
             font-family: 'DS-Digital', sans-serif;
-            font-size: 1.2rem;
-            color: var(--vfd-dim);
-            transition: all 0.2s;
+            font-size: 1.3rem;
+            color: var(--vfd-green); /* Par défaut vert pour les fichiers chargés */
+            opacity: 0.8;
+            transition: all 0.3s;
         }
 
         .track-num.active {
             color: var(--vfd-red);
-            text-shadow: 0 0 8px var(--vfd-red);
+            opacity: 1;
+            text-shadow: 0 0 10px var(--vfd-red), 0 0 5px var(--vfd-red);
+            transform: scale(1.1);
         }
 
         .track-name-display {
             color: var(--vfd-green);
             font-family: 'Courier New', monospace;
             font-size: 0.7rem;
-            opacity: 0.7;
+            opacity: 0.6;
             text-transform: uppercase;
             overflow: hidden;
             white-space: nowrap;
@@ -138,7 +142,7 @@
 
         .controls-grid {
             display: grid;
-            grid-template-columns: repeat(6, 1fr); /* Étendu pour Back/Next */
+            grid-template-columns: repeat(6, 1fr);
             gap: 8px;
             margin-bottom: 10px;
         }
@@ -222,7 +226,7 @@
         <input type="range" id="shuttle" min="-10" max="10" value="0" oninput="doShuttle(this.value)" onchange="resetShuttle()">
     </div>
 
-    <div class="file-zone" id="load-box">LOAD MULTIPLE FILES</div>
+    <div class="file-zone" id="load-box">LOAD MULTIPLE FILES (SHIFT/CTRL + CLICK)</div>
     <input type="file" id="file-in" style="display:none" accept="audio/*" multiple>
 </div>
 
@@ -261,6 +265,7 @@
         trackGrid.innerHTML = '';
         playlist.forEach((_, i) => {
             const span = document.createElement('span');
+            // La classe active gère le passage au ROUGE
             span.className = 'track-num' + (i === currentIndex ? ' active' : '');
             span.innerText = (i + 1);
             trackGrid.appendChild(span);
@@ -289,12 +294,14 @@
     }
 
     function nextTrack() {
+        if(playlist.length === 0) return;
         currentIndex = (currentIndex + 1) % playlist.length;
         loadTrack(currentIndex);
         handlePlay();
     }
 
     function prevTrack() {
+        if(playlist.length === 0) return;
         currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
         loadTrack(currentIndex);
         handlePlay();
@@ -343,8 +350,8 @@
         for(let i = 0; i < 20; i++) sum += dataArray[i];
         let val = sum / 20;
         ctx.fillStyle = "var(--vfd-green)";
-        ctx.fillRect(0, 10, val * 2, 10);
-        ctx.fillRect(0, 25, val * 1.9, 10);
+        ctx.fillRect(0, 10, val * 2, 8);
+        ctx.fillRect(0, 22, val * 1.9, 8);
     }
 
     function doShuttle(v) { if(v != 0) { audio.currentTime += (v * 0.4); statusFunc.innerText = v > 0 ? "SEARCH >>" : "<< SEARCH"; } }
