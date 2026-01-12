@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740 - Visual Alignment</title>
+    <title>Technics SL-PS 740</title>
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
     <style>
         :root {
@@ -43,6 +43,9 @@
             margin-bottom: 10px;
             font-size: 0.75rem;
             color: #888;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .display-panel {
@@ -99,13 +102,12 @@
             margin-top: 10px;
         }
 
-        /* MISE À JOUR : Police identique à status-line */
         .track-num {
             font-family: inherit; 
             font-size: 0.85rem;
             font-weight: 600;
             color: var(--vfd-green);
-            opacity: 0.4;
+            opacity: 0.3;
             letter-spacing: 1px;
         }
 
@@ -140,6 +142,13 @@
             cursor: pointer; text-transform: uppercase;
         }
         button:active { background: #333; }
+
+        .controls-grid-large {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
 
         .shuttle-zone { margin-top: 15px; background: #0a0a0a; padding: 15px; }
         .shuttle-label { font-size: 0.6rem; color: #444; text-align: center; margin-bottom: 8px; }
@@ -199,7 +208,7 @@
         <button onclick="toggleVUMode()">VU</button>
     </div>
 
-    <div class="controls-grid" style="grid-template-columns: repeat(2, 1fr);">
+    <div class="controls-grid-large">
         <button onclick="handleOpen()" style="padding: 15px;">Open</button>
         <button onclick="handleClose()" style="padding: 15px;">Close</button>
     </div>
@@ -237,6 +246,7 @@
         playlist = [];
         currentIndex = 0;
         audio.src = "";
+        fileIn.value = ""; // Fix pour permettre le rechargement immédiat
         timer.innerText = "00:00";
         statusFunc.innerText = "NO DISC";
         fileNameDisp.innerText = "- - - - -";
