@@ -1,35 +1,19 @@
 {
-  "short_name": "SL-PS470A",
-  "name": "Technics SL-PS470A Player",
+  "name": "Technics SL-PS740A Player",
+  "short_name": "SL-PS740A",
+  "description": "Technics Digital Audio Player Interface",
+  "start_url": "index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080808",
+  "theme_color": "#141414",
   "icons": [
-    {
-      "src": "img/favicon_96.png",
-      "sizes": "96x96",
-      "type": "image/png"
-    },
-    {
-      "src": "img/favicon_128.png",
-      "sizes": "128x128",
-      "type": "image/png"
-    },
-    {
-      "src": "img/favicon_256.png",
-      "sizes": "256x256",
-      "type": "image/png"
-    },
     {
       "src": "img/favicon_512.png",
       "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "img/favicon_1024.png",
-      "sizes": "1024x1024",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#141414",
-  "background_color": "#080808"
+  ]
 }
+
