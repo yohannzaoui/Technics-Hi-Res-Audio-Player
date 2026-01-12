@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740</title>
+    <title>Technics SL-PS470A</title>
+    
+    <meta name="author" content="Yohann Zaoui">
+    <meta name="owner" content="Yohann Zaoui">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SL-PS470A">
+    <link rel="apple-touch-icon" href="favicon-technics.png">
+    
+    <link rel="icon" type="image/png" href="favicon-technics.png">
+    
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
     <style>
         :root {
@@ -24,6 +35,8 @@
             min-height: 100vh;
             margin: 0;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .player-container {
@@ -34,6 +47,7 @@
             max-width: 600px;
             border: 1px solid #222;
             box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+            -webkit-font-smoothing: antialiased;
         }
 
         .header-line {
@@ -133,7 +147,6 @@
             height: 60px;
             margin-top: 10px;
         }
-        /* Canvas haute résolution */
         canvas { width: 100%; height: 100%; display: block; }
 
         .controls-grid {
@@ -146,6 +159,8 @@
             background: #1e1e1e; border: 1px solid #333; color: #ddd;
             padding: 10px 2px; font-size: 0.6rem; font-weight: bold;
             cursor: pointer; text-transform: uppercase;
+            -webkit-appearance: none;
+            border-radius: 2px;
         }
         button:active { background: #333; }
 
@@ -167,7 +182,7 @@
 <div class="player-container">
     <div class="header-line">
         <span>Technics</span>
-        <span>SL-PS 740 / MASH 1-BIT DAC</span>
+        <span>SL-PS470A / MASH 1-BIT DAC</span>
     </div>
 
     <div class="display-panel">
@@ -299,7 +314,8 @@
 
     function initAudio() {
         if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
             analyser = audioCtx.createAnalyser();
             analyser.fftSize = 256;
             const source = audioCtx.createMediaElementSource(audio);
@@ -388,7 +404,7 @@
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         const segments = 22, gap = 8;
-        const startX = 60; // Plus d'espace pour les labels
+        const startX = 60;
         const segW = ((canvas.width - startX) / segments) - gap;
         const barHeight = 35;
         const spacing = 20;
@@ -398,8 +414,6 @@
 
         for(let ch = 0; ch < 2; ch++) {
             let y = (ch === 0) ? 10 : 10 + barHeight + spacing;
-            
-            // Labels L / R en vert VFD
             ctx.fillStyle = "#24ff8a";
             ctx.fillText(ch === 0 ? "L" : "R", 10, y + 28);
 
