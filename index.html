@@ -67,12 +67,10 @@
             letter-spacing: 1px;
         }
 
-        /* Large Logo with Metallic Relief Effect */
         .brand-logo-img {
             height: 70px;
             width: auto;
             display: block;
-            /* Filtre pour créer une ombre portée qui suit la forme des lettres */
             filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.8)) 
                     drop-shadow(0px 1px 0px rgba(255, 255, 255, 0.1));
         }
@@ -239,9 +237,7 @@
     <div class="controls-grid">
         <button onclick="handlePlay()">Play</button>
         <button onclick="handlePause()">Pause</button>
-        <button onclick="prevTrack()">|<<</button>
-        <button onclick="nextTrack()">>>|</button>
-        <button onclick="handleStop()">Stop</button>
+        <button onclick="prevTrack()"><<</button> <button onclick="nextTrack()">>></button> <button onclick="handleStop()">Stop</button>
         <button onclick="toggleTime()">Time</button>
     </div>
     
@@ -334,6 +330,7 @@
         fileNameDisp.innerText = playlist[index].name.toUpperCase();
         updateTrackDisplay();
         audio.load();
+        updateMediaSession();
     }
 
     function initAudio() {
@@ -455,6 +452,29 @@
     function resetShuttle() { document.getElementById('shuttle').value = 0; if (audio.src) statusFunc.innerText = audio.paused ? "PAUSE" : "PLAY"; }
     function runAutoCue() { audio.currentTime = 0; audio.pause(); statusFunc.innerText = "AUTO CUE"; }
     function runPeak() { statusFunc.innerText = "PEAK"; setTimeout(() => { statusFunc.innerText = "PLAY"; audio.currentTime = audio.duration * 0.3; audio.play(); }, 1000); }
+
+    // --- Media Session API Integration ---
+    function updateMediaSession() {
+        if ('mediaSession' in navigator && playlist.length > 0) {
+            const track = playlist[currentIndex];
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.name.replace(/\.[^/.]+$/, ""),
+                artist: "Technics SL-PS740A",
+                album: "Digital Audio Player",
+                artwork: [{ src: 'img/favicon_512.png', sizes: '512x512', type: 'image/png' }]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => handlePlay());
+            navigator.mediaSession.setActionHandler('pause', () => handlePause());
+            navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+            navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+            navigator.mediaSession.setActionHandler('stop', () => handleStop());
+        }
+    }
+
+    audio.onplay = () => { navigator.mediaSession.playbackState = "playing"; };
+    audio.onpause = () => { navigator.mediaSession.playbackState = "paused"; };
+
 </script>
 </body>
 </html>
