@@ -3,8 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740</title>
+    <title>Technics SL-PS740A</title>
+    
+    <meta name="author" content="Yohann Zaoui">
+    <meta name="owner" content="Yohann Zaoui">
+    <meta name="description" content="Technics SL-PS740A Digital Audio Player Interface">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#141414">
+
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SL-PS740A">
+    
+    <link rel="icon" type="image/png" sizes="512x512" href="img/favicon_512.png">
+    <link rel="apple-touch-icon" href="img/favicon_512.png">
+    
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
+    
     <style>
         :root {
             --bg-color: #080808;
@@ -24,6 +40,8 @@
             min-height: 100vh;
             margin: 0;
             -webkit-tap-highlight-color: transparent;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         .player-container {
@@ -34,18 +52,27 @@
             max-width: 600px;
             border: 1px solid #222;
             box-shadow: 0 40px 100px rgba(0,0,0,0.9);
+            -webkit-font-smoothing: antialiased;
         }
 
         .header-line {
             display: flex;
             justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 10px;
+            align-items: center;
+            margin-bottom: 20px;
             font-size: 0.75rem;
             color: #888;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+
+        .brand-logo-img {
+            height: 70px;
+            width: auto;
+            display: block;
+            filter: drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.8)) 
+                    drop-shadow(0px 1px 0px rgba(255, 255, 255, 0.1));
         }
 
         .display-panel {
@@ -76,6 +103,10 @@
             font-weight: bold;
             line-height: 1;
             text-shadow: 0 0 15px rgba(36, 255, 138, 0.4);
+            font-variant-numeric: tabular-nums;
+            min-width: 5ch;
+            display: inline-block;
+            text-align: center;
         }
 
         .side-indicators {
@@ -133,7 +164,6 @@
             height: 60px;
             margin-top: 10px;
         }
-        /* Canvas haute résolution */
         canvas { width: 100%; height: 100%; display: block; }
 
         .controls-grid {
@@ -146,6 +176,7 @@
             background: #1e1e1e; border: 1px solid #333; color: #ddd;
             padding: 10px 2px; font-size: 0.6rem; font-weight: bold;
             cursor: pointer; text-transform: uppercase;
+            border-radius: 2px;
         }
         button:active { background: #333; }
 
@@ -157,7 +188,16 @@
         }
 
         .shuttle-zone { margin-top: 15px; background: #0a0a0a; padding: 15px; }
-        .shuttle-label { font-size: 0.6rem; color: #444; text-align: center; margin-bottom: 8px; }
+        
+        .shuttle-label { 
+            font-size: 0.6rem; 
+            color: #ffffff; 
+            text-align: center; 
+            margin-bottom: 8px; 
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+
         input[type="range"] { width: 100%; height: 3px; background: #222; outline: none; -webkit-appearance: none; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 15px; background: #444; cursor: pointer;}
     </style>
@@ -166,8 +206,8 @@
 
 <div class="player-container">
     <div class="header-line">
-        <span>Technics</span>
-        <span>SL-PS 740 / MASH 1-BIT DAC</span>
+        <img src="img/Technics_logo.png" alt="Technics" class="brand-logo-img">
+        <span>SL-PS740A / MASH 1-BIT DAC</span>
     </div>
 
     <div class="display-panel">
@@ -197,9 +237,7 @@
     <div class="controls-grid">
         <button onclick="handlePlay()">Play</button>
         <button onclick="handlePause()">Pause</button>
-        <button onclick="prevTrack()">|<<</button>
-        <button onclick="nextTrack()">>>|</button>
-        <button onclick="handleStop()">Stop</button>
+        <button onclick="prevTrack()"><<</button> <button onclick="nextTrack()">>></button> <button onclick="handleStop()">Stop</button>
         <button onclick="toggleTime()">Time</button>
     </div>
     
@@ -262,10 +300,7 @@
         trackGrid.innerHTML = "";
         isShuffle = false;
         repeatMode = 0;
-        document.getElementById('ind-shuffle').classList.remove('active');
-        document.getElementById('ind-repeat1').classList.remove('active');
-        document.getElementById('ind-repeatAll').classList.remove('active');
-        document.getElementById('ind-ab').classList.remove('active');
+        document.querySelectorAll('.ind').forEach(el => el.classList.remove('active'));
     }
 
     fileIn.onchange = (e) => {
@@ -295,11 +330,13 @@
         fileNameDisp.innerText = playlist[index].name.toUpperCase();
         updateTrackDisplay();
         audio.load();
+        updateMediaSession();
     }
 
     function initAudio() {
         if (!audioCtx) {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContext();
             analyser = audioCtx.createAnalyser();
             analyser.fftSize = 256;
             const source = audioCtx.createMediaElementSource(audio);
@@ -386,9 +423,7 @@
         if (currentVol < lastVolume) lastVolume -= 1.5; else lastVolume = currentVol;
         
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        const segments = 22, gap = 8;
-        const startX = 60; // Plus d'espace pour les labels
+        const segments = 22, gap = 8, startX = 60;
         const segW = ((canvas.width - startX) / segments) - gap;
         const barHeight = 35;
         const spacing = 20;
@@ -398,13 +433,9 @@
 
         for(let ch = 0; ch < 2; ch++) {
             let y = (ch === 0) ? 10 : 10 + barHeight + spacing;
-            
-            // Labels L / R en vert VFD
             ctx.fillStyle = "#24ff8a";
             ctx.fillText(ch === 0 ? "L" : "R", 10, y + 28);
-
             let level = (ch === 0) ? lastVolume : lastVolume * (0.95 + Math.random()*0.1);
-            
             for(let i = 0; i < segments; i++) {
                 let threshold = (i / segments) * 255;
                 if (level > threshold && level > 10) {
@@ -421,6 +452,29 @@
     function resetShuttle() { document.getElementById('shuttle').value = 0; if (audio.src) statusFunc.innerText = audio.paused ? "PAUSE" : "PLAY"; }
     function runAutoCue() { audio.currentTime = 0; audio.pause(); statusFunc.innerText = "AUTO CUE"; }
     function runPeak() { statusFunc.innerText = "PEAK"; setTimeout(() => { statusFunc.innerText = "PLAY"; audio.currentTime = audio.duration * 0.3; audio.play(); }, 1000); }
+
+    // --- Media Session API Integration ---
+    function updateMediaSession() {
+        if ('mediaSession' in navigator && playlist.length > 0) {
+            const track = playlist[currentIndex];
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: track.name.replace(/\.[^/.]+$/, ""),
+                artist: "Technics SL-PS740A",
+                album: "Digital Audio Player",
+                artwork: [{ src: 'img/favicon_512.png', sizes: '512x512', type: 'image/png' }]
+            });
+
+            navigator.mediaSession.setActionHandler('play', () => handlePlay());
+            navigator.mediaSession.setActionHandler('pause', () => handlePause());
+            navigator.mediaSession.setActionHandler('previoustrack', () => prevTrack());
+            navigator.mediaSession.setActionHandler('nexttrack', () => nextTrack());
+            navigator.mediaSession.setActionHandler('stop', () => handleStop());
+        }
+    }
+
+    audio.onplay = () => { navigator.mediaSession.playbackState = "playing"; };
+    audio.onpause = () => { navigator.mediaSession.playbackState = "paused"; };
+
 </script>
 </body>
 </html>
