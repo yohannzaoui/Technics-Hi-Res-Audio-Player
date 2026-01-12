@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Technics SL-PS 740</title>
+    <title>Technics SL-PS 740 - Mechanical Logic</title>
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
     <style>
         :root {
@@ -80,27 +80,16 @@
             flex-direction: column;
             gap: 5px;
             text-align: left;
-            min-width: 140px; /* Élargi pour la ligne horizontale */
+            min-width: 140px;
         }
 
-        /* Ligne du haut : Shuffle et A-B */
-        .ind-row {
-            display: flex;
-            gap: 15px;
-        }
+        .ind-row { display: flex; gap: 15px; }
 
         .ind { 
-            font-size: 0.6rem; 
-            font-weight: bold; 
-            color: #121212; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            transition: color 0.2s; 
+            font-size: 0.6rem; font-weight: bold; color: #121212; 
+            text-transform: uppercase; letter-spacing: 1px; transition: color 0.2s; 
         }
-        .ind.active { 
-            color: var(--vfd-green); 
-            text-shadow: 0 0 8px var(--vfd-green); 
-        }
+        .ind.active { color: var(--vfd-green); text-shadow: 0 0 8px var(--vfd-green); }
 
         .track-grid {
             display: flex;
@@ -145,8 +134,6 @@
         .shuttle-label { font-size: 0.6rem; color: #444; text-align: center; margin-bottom: 8px; }
         input[type="range"] { width: 100%; height: 3px; background: #222; outline: none; -webkit-appearance: none; }
         input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 15px; background: #444; cursor: pointer;}
-
-        .file-zone { margin-top: 15px; padding: 15px; border: 1px solid #222; text-align: center; font-size: 0.8rem; color: #666; background: #0a0a0a; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -201,12 +188,16 @@
         <button onclick="toggleVUMode()">VU</button>
     </div>
 
+    <div class="controls-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <button onclick="handleOpen()" style="padding: 15px;">Open</button>
+        <button onclick="handleClose()" style="padding: 15px;">Close</button>
+    </div>
+
     <div class="shuttle-zone">
         <div class="shuttle-label">JOG SHUTTLE</div>
         <input type="range" id="shuttle" min="-10" max="10" value="0" oninput="doShuttle(this.value)" onchange="resetShuttle()">
     </div>
 
-    <div class="file-zone" id="load-box">LOAD MULTIPLE FILES (CTRL+CLICK)</div>
     <input type="file" id="file-in" style="display:none" accept="audio/*" multiple>
 </div>
 
@@ -228,7 +219,30 @@
     let repeatMode = 0, isShuffle = false;
     let pointA = null, pointB = null, lastVolume = 0;
 
-    document.getElementById('load-box').onclick = () => fileIn.click();
+    // Fonction OPEN
+    function handleOpen() {
+        fileIn.click();
+    }
+
+    // Fonction CLOSE (Reset total)
+    function handleClose() {
+        handleStop();
+        playlist = [];
+        currentIndex = 0;
+        audio.src = "";
+        timer.innerText = "00:00";
+        statusFunc.innerText = "NO DISC";
+        fileNameDisp.innerText = "- - - - -";
+        trackGrid.innerHTML = "";
+        
+        // Reset des indicateurs visuels
+        isShuffle = false;
+        repeatMode = 0;
+        document.getElementById('ind-shuffle').classList.remove('active');
+        document.getElementById('ind-repeat1').classList.remove('active');
+        document.getElementById('ind-repeatAll').classList.remove('active');
+        document.getElementById('ind-ab').classList.remove('active');
+    }
 
     fileIn.onchange = (e) => {
         const files = Array.from(e.target.files);
@@ -331,16 +345,9 @@
 
     function handleAB() {
         const ind = document.getElementById('ind-ab');
-        if (pointA === null) { 
-            pointA = audio.currentTime; 
-            ind.classList.add('active'); // S'allume au premier clic (Point A)
-        } else if (pointB === null) { 
-            pointB = audio.currentTime; 
-            // Reste allumé (Point B validé)
-        } else { 
-            pointA = pointB = null; 
-            ind.classList.remove('active'); // S'éteint si on annule
-        }
+        if (pointA === null) { pointA = audio.currentTime; ind.classList.add('active'); }
+        else if (pointB === null) { pointB = audio.currentTime; }
+        else { pointA = pointB = null; ind.classList.remove('active'); }
     }
 
     function drawVU() {
