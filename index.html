@@ -36,7 +36,7 @@
         .player-container { background: var(--panel-color); padding: 25px; border-radius: 4px; width: 90%; max-width: 600px; border: 1px solid var(--panel-border); box-shadow: 0 40px 100px var(--shadow-main); }
         .header-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 0.7rem; color: var(--header-text); font-weight: 500; text-transform: uppercase; letter-spacing: 0.8px; }
         .brand-logo-img { height: 70px; filter: var(--logo-filter); cursor: pointer; }
-        .display-panel { background: #000; padding: 15px; border: 2px solid var(--display-border); margin-bottom: 20px; text-align: center; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 0 15px #000; }
+        .display-panel { background: #000; padding: 15px; border: 2px solid var(--display-border); margin-bottom: 20px; text-align: center; min-height: 280px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: inset 0 0 25px rgba(0,0,0,1), inset 0 0 10px rgba(255,255,255,0.05); }
         .status-line { color: var(--vfd-main); font-size: 0.75rem; letter-spacing: 2px; height: 1.2rem; text-transform: uppercase; text-shadow: 0 0 8px var(--vfd-shadow-main); display: flex; justify-content: center; align-items: center; }
         .time-display { color: var(--vfd-main); font-family: 'DS-Digital', sans-serif; font-variant-numeric: tabular-nums; font-size: 5.8rem; font-weight: 500; text-shadow: 0 0 15px var(--vfd-shadow-main); display: flex; justify-content: center; align-items: baseline; gap: 2px; }
         .digit { width: 0.6em; text-align: center; }
@@ -44,7 +44,7 @@
         .ind { font-size: 0.6rem; font-weight: 500; color: #121212 !important; text-transform: uppercase; transition: 0.2s; }
         .ind.active { color: var(--vfd-main) !important; text-shadow: 0 0 8px var(--vfd-shadow-main); }
         #format-info { color: var(--vfd-red); font-weight: 700; font-size: 0.65rem; text-shadow: 0 0 8px var(--vfd-shadow-red); margin: 2px 0; }
-        #file-info-line { color: var(--vfd-main) !important; font-size: 0.75rem; text-shadow: 0 0 6px var(--vfd-shadow-main); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; margin: 5px 0; text-transform: uppercase; }
+        #file-info-line { color: var(--vfd-main) !important; font-size: 0.7rem; text-shadow: 0 0 6px var(--vfd-shadow-main); cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 10px; margin: 5px 0; text-transform: uppercase; font-weight: 400; opacity: 0.9; }
         .track-grid { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; padding: 10px 0; border-top: 1px solid var(--vfd-sep-line); }
         .track-num { font-size: 0.85rem; color: var(--vfd-main); opacity: 0.5; font-weight: 500; }
         .track-num.active { color: var(--vfd-red); opacity: 1; text-shadow: 0 0 12px var(--vfd-shadow-red); }
@@ -151,10 +151,19 @@
         formatInfo.innerText = file.name.split('.').pop().toUpperCase();
         if (window.jsmediatags) {
             window.jsmediatags.read(file, { onSuccess: (tag) => {
-                const t = tag.tags; fileInfoLine.innerText = `${t.artist || "UNKNOWN"} - ${t.title || file.name}`.toUpperCase();
+                const t = tag.tags;
+                // INCLUSION DE L'ALBUM ICI
+                const artist = t.artist || "UNKNOWN ARTIST";
+                const album = t.album || "UNKNOWN ALBUM";
+                const title = t.title || file.name;
+                fileInfoLine.innerText = `${artist} - ${album} - ${title}`.toUpperCase();
+                
                 if (t.picture) { const { data, format } = t.picture; let base64 = ""; for (let i = 0; i < data.length; i++) base64 += String.fromCharCode(data[i]); modalImg.src = `data:${format};base64,${window.btoa(base64)}`; } else { modalImg.src = "img/Technics_logo.png"; }
                 updateMediaSession(t, file);
-            }, onError: () => updateMediaSession({}, file)});
+            }, onError: () => {
+                fileInfoLine.innerText = file.name.toUpperCase();
+                updateMediaSession({}, file);
+            }});
         }
         updateTrackDisplay(); audio.load();
     }
@@ -185,7 +194,6 @@
             statusFunc.innerText = "PEAK FOUND";
             handlePlay(); setTimeout(() => { handlePause(); updateStatusText(); }, 3000);
         } catch (e) {
-            // FAKE PEAK (Simulation if memory/CORS fails)
             setTimeout(() => { audio.currentTime = Math.random() * (audio.duration || 10); statusFunc.innerText = "PEAK FOUND"; handlePlay(); setTimeout(() => { handlePause(); updateStatusText(); }, 2000); }, 1500);
         }
     }
