@@ -153,18 +153,24 @@
         .meter-segment.on-blue { background: var(--vfd-blue); box-shadow: 0 0 5px var(--vfd-blue); }
         .meter-segment.on-red { background: var(--vfd-red); box-shadow: 0 0 5px var(--vfd-red); }
 
+        /* --- STYLES MODIFIÉS POUR LA POCHETTE --- */
         #art-modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
-            width: 100%; height: 100%; background-color: rgba(0,0,0,0.85);
-            justify-content: center; align-items: center; backdrop-filter: blur(8px);
+            width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
+            justify-content: center; align-items: center; backdrop-filter: blur(10px);
         }
         .modal-content {
-            background: #111; border: 2px solid #333; padding: 25px;
-            box-shadow: 0 0 80px rgba(0,0,0,1); text-align: center; border-radius: 8px;
-            max-width: 500px;
+            background: #111; border: 2px solid #333; padding: 30px;
+            box-shadow: 0 0 100px rgba(0,0,0,1); text-align: center; border-radius: 8px;
+            max-width: 800px; /* Augmenté pour accueillir l'image */
         }
-        #art-image { width: 400px; height: 400px; object-fit: cover; border-radius: 4px; box-shadow: 0 0 20px #000; }
-        #art-info { color: var(--vfd-blue); margin-top: 20px; font-weight: bold; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; line-height: 1.5; }
+        #art-image { 
+            width: 700px; /* Taille augmentée */
+            height: 700px; /* Taille augmentée */
+            object-fit: cover; border-radius: 4px; 
+            box-shadow: 0 0 40px #000; 
+        }
+        #art-info { color: var(--vfd-blue); margin-top: 25px; font-weight: bold; text-transform: uppercase; font-size: 16px; letter-spacing: 2px; line-height: 1.5; }
     </style>
 </head>
 <body>
@@ -276,7 +282,7 @@
         let repeatMode = 0, isShuffle = false, timeMode = 0, isVUOn = true;
         let pointA = null, pointB = null, isPeakSearching = false;
         let inputBuffer = "", inputTimeout = null, volDisplayTimeout = null;
-        let audioCtx, analyzer, dataArray;
+        let audioCtx, analyzer, dataArray, searchInterval = null;
 
         const gridWrapper = document.getElementById('grid-numbers-wrapper');
         for(let i=1; i<=20; i++) {
@@ -297,11 +303,45 @@
             document.getElementById('s-d2').innerText = s.length > 2 ? s[2] : s[1];
             volDisplayTimeout = setTimeout(() => {
                 volDisplayTimeout = null;
-                timeLabel.innerText = "Min : Sec";
+                timeLabel.innerText = timeMode === 0 ? "Min : Sec" : "- Min : Sec";
                 timeSep.style.opacity = "1";
                 updateTimeDisplay();
             }, 2000);
         }
+
+        function startSearch(dir) {
+            if (!playlist.length || isPeakSearching) return;
+            audio.muted = true;
+            searchInterval = setInterval(() => {
+                audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + (dir * 2)));
+                updateTimeDisplay();
+            }, 100);
+        }
+
+        function stopSearch() {
+            if (searchInterval) {
+                clearInterval(searchInterval);
+                searchInterval = null;
+                audio.muted = false;
+            }
+        }
+
+        document.getElementById('fwd-btn').onmousedown = () => startSearch(1);
+        document.getElementById('fwd-btn').onmouseup = stopSearch;
+        document.getElementById('rew-btn').onmousedown = () => startSearch(-1);
+        document.getElementById('rew-btn').onmouseup = stopSearch;
+
+        document.getElementById('plus-10-btn').onclick = () => {
+            if (!playlist.length) return;
+            audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+            updateTimeDisplay();
+        };
+
+        document.getElementById('minus-10-btn').onclick = () => {
+            if (!playlist.length) return;
+            audio.currentTime = Math.max(0, audio.currentTime - 10);
+            updateTimeDisplay();
+        };
 
         document.getElementById('peak-btn').onclick = async () => {
             if (!playlist.length || isPeakSearching) return;
@@ -420,7 +460,6 @@
 
         function loadTrack(idx) {
             if (!playlist.length) return;
-            // Logique SHUFFLE
             if (isShuffle && idx !== currentIndex) {
                 idx = Math.floor(Math.random() * playlist.length);
             }
@@ -488,7 +527,13 @@
             document.getElementById('vfd-repeat-1').classList.toggle('active', repeatMode === 1);
             document.getElementById('vfd-repeat-all').classList.toggle('active', repeatMode === 2);
         };
-        document.getElementById('time-btn').onclick = () => { timeMode = (timeMode + 1) % 2; };
+
+        document.getElementById('time-btn').onclick = () => { 
+            timeMode = (timeMode + 1) % 2; 
+            const label = document.getElementById('time-label');
+            label.innerText = (timeMode === 0) ? "Min : Sec" : "- Min : Sec";
+            updateTimeDisplay();
+        };
         
         function openArt() { 
             document.getElementById('art-image').src = currentArt; 
