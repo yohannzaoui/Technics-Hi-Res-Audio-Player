@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Technics SL-PG740A - Final Stable Base</title>
+    <title>Technics SL-PG740A - Professional Interface</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link href="https://fonts.cdnfonts.com/css/ds-digital" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
     
     <style>
         :root {
@@ -14,6 +15,7 @@
             --vfd-blue: #40e0ff;
             --vfd-glow: rgba(64, 224, 255, 0.5);
             --vfd-blue-dim: #003a4d;
+            --vfd-off: #0a0a0a;
             --vfd-red: #ff3333;
             --text-silver: #a0a0a0;
             --text-white: #ffffff;
@@ -97,11 +99,9 @@
         .vfd-indicator { font-family: var(--ui-font); font-size: 10px; font-weight: bold; color: #08181a; text-transform: uppercase; letter-spacing: 1px; }
         .vfd-indicator.active { color: var(--vfd-blue); text-shadow: 0 0 8px var(--vfd-blue); }
         
-        @keyframes blink-vfd-blue { 0%, 100% { color: var(--vfd-blue); text-shadow: 0 0 8px var(--vfd-blue); } 50% { color: #08181a; text-shadow: none; } }
-        .vfd-blink-blue { animation: blink-vfd-blue 0.6s step-start infinite !important; }
-        
-        @keyframes blink-opacity { 50% { opacity: 0.1; } }
-        .vfd-blink-dim { animation: blink-opacity 0.6s step-start infinite !important; }
+        @keyframes vfd-flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        .vfd-input-blink { animation: vfd-flash 0.4s infinite; }
+        .vfd-blink-dim { animation: vfd-flash 0.8s infinite; }
 
         .digital-counter {
             display: flex; align-items: center; font-family: var(--digital-font); 
@@ -109,13 +109,10 @@
             text-shadow: 0 0 15px var(--vfd-blue-dim); line-height: 1;
         }
         .digit { width: 38px; text-align: center; }
-        .digit-sign { width: 20px; text-align: center; font-size: 35px; display: none; color: var(--vfd-blue); }
-        .digit-sign.visible { display: inline-block; }
-        .time-separator { width: 15px; text-align: center; font-size: 40px; padding-bottom: 8px; }
+        .time-separator { width: 15px; text-align: center; font-size: 40px; padding-bottom: 8px; transition: opacity 0.2s; }
 
         .label-vfd { font-size: 11px; color: var(--vfd-blue-dim); font-family: var(--ui-font); font-weight: bold; text-transform: uppercase; margin-bottom: 6px; display: block; letter-spacing: 2px;}
         .label-vfd.clickable { cursor: pointer; color: var(--vfd-blue); transition: color 0.2s; }
-        .label-vfd.clickable:hover { color: #fff; text-shadow: 0 0 5px var(--vfd-blue); }
 
         .main-interface { display: grid; grid-template-columns: 120px 1fr 340px; gap: 40px; align-items: start; }
         
@@ -126,52 +123,67 @@
             display: flex; align-items: center; justify-content: center;
         }
         .btn:active { background: linear-gradient(145deg, #151516, #2a2a2b); box-shadow: inset 2px 2px 5px #000; color: var(--text-white); }
-        .btn-num { height: 38px; font-size: 15px; }
 
-        .knob { background: var(--brushed-metal); border-radius: 50%; border: 3px solid #111; cursor: pointer; box-shadow: 5px 5px 15px #000; margin: 10px auto; position: relative; }
+        .numeric-grid {
+            display: grid; grid-template-columns: repeat(10, 1fr); gap: 8px; 
+            margin-top: 25px; width: 100%;
+        }
+
+        .transport-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; 
+            margin-top: 20px; width: 100%;
+        }
+
+        .knob-container { text-align: center; }
+        .knob { 
+            background: var(--brushed-metal); border-radius: 50%; border: 3px solid #111; 
+            cursor: pointer; box-shadow: 5px 5px 15px #000; margin: 10px auto; 
+            position: relative; transform: rotate(-110deg); transition: transform 0.1s linear;
+        }
         .vol-knob { width: 75px; height: 75px; }
-        .jog-knob { width: 130px; height: 130px; }
+        .jog-knob { width: 130px; height: 130px; transform: rotate(0deg); }
 
-        .vu-meters { opacity: 1; transition: opacity 0.3s ease; }
+        .vu-meters { transition: opacity 0.3s ease; }
         .vu-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
-        .vu-label { color: var(--vfd-blue-dim); font-family: var(--ui-font); font-size: 12px; font-weight: bold; width: 15px; }
-        .vu-label.active { color: var(--vfd-blue); text-shadow: 0 0 5px var(--vfd-blue); }
+        .vu-label { color: #08181a; font-family: var(--ui-font); font-size: 12px; font-weight: bold; width: 15px; transition: color 0.3s; }
+        .vu-label.active { color: var(--vfd-blue-dim); }
+        .vu-label.on { color: var(--vfd-blue); text-shadow: 0 0 5px var(--vfd-blue); }
         
         .meter-container { flex: 1; height: 10px; background: #080808; display: flex; gap: 2px; padding: 1px; }
-        .meter-segment { flex: 1; background: #0a0a0a; transition: background 0.1s; }
+        .meter-segment { flex: 1; background: var(--vfd-off); transition: background 0.05s; }
         .meter-segment.on-blue { background: var(--vfd-blue); box-shadow: 0 0 5px var(--vfd-blue); }
         .meter-segment.on-red { background: var(--vfd-red); box-shadow: 0 0 5px var(--vfd-red); }
 
-        .controls-right-stack { display: flex; flex-direction: column; gap: 25px; }
-
-        /* MODAL POPUP STYLES */
         #art-modal {
             display: none; position: fixed; z-index: 1000; left: 0; top: 0;
             width: 100%; height: 100%; background-color: rgba(0,0,0,0.85);
-            justify-content: center; align-items: center; backdrop-filter: blur(5px);
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
         }
         .modal-content {
-            background: #111; border: 2px solid #333; padding: 10px;
-            box-shadow: 0 0 50px rgba(0,0,0,1); text-align: center;
-            max-width: 450px; border-radius: 4px;
+            background: #111; border: 2px solid #333; padding: 25px;
+            box-shadow: 0 0 80px rgba(0,0,0,1); text-align: center; border-radius: 8px;
+            max-width: 500px;
         }
-        #art-image { width: 400px; height: 400px; object-fit: cover; border: 1px solid #222; background: #000; }
-        .modal-close { margin-top: 10px; color: #666; font-size: 12px; text-transform: uppercase; cursor: pointer; font-weight: bold; }
-        .modal-close:hover { color: #fff; }
+        #art-image { width: 400px; height: 400px; object-fit: cover; border-radius: 4px; box-shadow: 0 0 20px #000; }
+        #art-info { 
+            color: var(--vfd-blue); margin-top: 20px; font-weight: bold; 
+            text-transform: uppercase; font-size: 14px; letter-spacing: 1px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
 
-    <div id="art-modal">
-        <div class="modal-content">
-            <img id="art-image" src="technics_logo.png" alt="Album Art">
-            <div class="modal-close" onclick="closeModal()">[ Click to close ]</div>
+    <div id="art-modal" onclick="this.style.display='none'">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <img id="art-image" src="technics_logo.png">
+            <div id="art-info">Technics - Audio Systems - Professional</div>
         </div>
     </div>
 
     <div class="deck-container">
         <header class="brand-header">
-            <img src="Technics_logo.png" alt="Technics" class="main-logo">
+            <img src="Technics_logo.png" class="main-logo">
             <div class="model-name">Stereo Compact Disc Player SL-PG740A</div>
         </header>
 
@@ -186,73 +198,50 @@
         </div>
 
         <div class="main-interface">
-            <div style="display: flex; flex-direction: column; gap: 40px; align-items: center;">
-                <div style="text-align:center; width: 100%;">
-                    <span style="font-size:10px; color:white; font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Power</span>
-                    <button class="btn" id="power-reset-btn" style="height:50px; width:70px; margin: 0 auto;">POWER</button>
-                </div>
+            <div style="text-align:center;">
+                <button class="btn" id="power-reset-btn" style="height:50px; width:70px;">POWER</button>
             </div>
 
             <div class="display-and-controls">
                 <section class="display-panel">
                     <div class="vfd-main-row">
-                        <div class="vfd-col-track">
-                            <span class="label-vfd clickable" id="track-label" onclick="openArtModal()">Track</span>
-                            <div class="digital-counter" id="track-counter-box">
-                                <span id="t-d1" class="digit">0</span><span id="t-d2" class="digit">0</span>
-                            </div>
+                        <div class="vfd-col-track" id="track-vfd-box">
+                            <span class="label-vfd clickable" id="track-label" onclick="openArt()">Track</span>
+                            <div class="digital-counter"><span id="t-d1" class="digit">0</span><span id="t-d2" class="digit">0</span></div>
                         </div>
-                        
                         <div class="vfd-col-indicators">
                             <div id="vfd-shuffle" class="vfd-indicator">Shuffle</div>
                             <div id="vfd-repeat-1" class="vfd-indicator">Repeat 1</div>
                             <div id="vfd-repeat-all" class="vfd-indicator">Repeat All</div>
                             <div id="vfd-ab" class="vfd-indicator">A-B</div>
                         </div>
-
-                        <div class="vfd-col-time" id="time-group">
-                            <span id="time-label" class="label-vfd">Min : Sec</span>
+                        <div class="vfd-col-time">
+                            <span class="label-vfd" id="time-label">Min : Sec</span>
                             <div class="digital-counter" id="main-time-display" style="justify-content: flex-end;">
-                                <span id="time-sign" class="digit-sign">-</span>
                                 <span id="m-d1" class="digit">0</span><span id="m-d2" class="digit">0</span>
-                                <span class="time-separator">:</span>
+                                <span class="time-separator" id="time-sep">:</span>
                                 <span id="s-d1" class="digit">0</span><span id="s-d2" class="digit">0</span>
                             </div>
                         </div>
-
-                        <div class="vfd-col-time" id="vol-group" style="display: none;">
-                            <span class="label-vfd">Volume</span>
-                            <div class="digital-counter" style="justify-content: flex-end;">
-                                <span id="v-d1" class="digit">0</span><span id="v-d2" class="digit">0</span>
-                            </div>
-                        </div>
                     </div>
-
-                    <div class="track-grid" id="track-grid-container">
-                        <div id="grid-numbers-wrapper" style="display: flex; gap: 10px;"></div>
+                    <div class="track-grid">
+                        <div id="grid-numbers-wrapper" style="display: flex; gap: 10px; align-items: center;"></div>
                         <div id="over-arrow" class="arrow-indicator">▶</div>
                     </div>
-                    
                     <div class="vu-meters" id="vu-meters-container">
-                        <div class="vu-row"><span class="vu-label" id="lab-L">L</span><div class="meter-container" id="meter-L"></div></div>
-                        <div class="vu-row"><span class="vu-label" id="lab-R">R</span><div class="meter-container" id="meter-R"></div></div>
+                        <div class="vu-row"><span class="vu-label on" id="lbl-L">L</span><div class="meter-container" id="meter-L"></div></div>
+                        <div class="vu-row"><span class="vu-label on" id="lbl-R">R</span><div class="meter-container" id="meter-R"></div></div>
                     </div>
                 </section>
 
-                <div style="display:grid; grid-template-columns: repeat(10, 1fr); gap:8px; margin-top:25px;">
-                    <button class="btn btn-num" onclick="numJump(1)">1</button>
-                    <button class="btn btn-num" onclick="numJump(2)">2</button>
-                    <button class="btn btn-num" onclick="numJump(3)">3</button>
-                    <button class="btn btn-num" onclick="numJump(4)">4</button>
-                    <button class="btn btn-num" onclick="numJump(5)">5</button>
-                    <button class="btn btn-num" onclick="numJump(6)">6</button>
-                    <button class="btn btn-num" onclick="numJump(7)">7</button>
-                    <button class="btn btn-num" onclick="numJump(8)">8</button>
-                    <button class="btn btn-num" onclick="numJump(9)">9</button>
-                    <button class="btn btn-num" onclick="numJump(0)">0</button>
+                <div class="numeric-grid">
+                    <button class="btn" onclick="handleNumKey(1)">1</button><button class="btn" onclick="handleNumKey(2)">2</button><button class="btn" onclick="handleNumKey(3)">3</button>
+                    <button class="btn" onclick="handleNumKey(4)">4</button><button class="btn" onclick="handleNumKey(5)">5</button><button class="btn" onclick="handleNumKey(6)">6</button>
+                    <button class="btn" onclick="handleNumKey(7)">7</button><button class="btn" onclick="handleNumKey(8)">8</button><button class="btn" onclick="handleNumKey(9)">9</button>
+                    <button class="btn" onclick="handleNumKey(0)">0</button>
                 </div>
 
-                <div style="display:grid; grid-template-columns: repeat(5, 1fr); gap:15px; margin-top:20px;">
+                <div class="transport-grid">
                     <button class="btn" id="eject-btn">⏏ EJECT</button>
                     <button class="btn" id="prev-btn">|◀◀</button>
                     <button class="btn" id="play-btn">▶ / ||</button>
@@ -261,27 +250,22 @@
                 </div>
             </div>
 
-            <div class="controls-right-stack">
-                <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:10px;">
-                    <button class="btn" id="rew-btn">◀◀ Search</button>
-                    <button class="btn" id="fwd-btn">Search ▶▶</button>
-                    <button class="btn" id="minus-10-btn">- 10 s</button>
-                    <button class="btn" id="plus-10-btn">+ 10 s</button>
-                    <button class="btn" id="shuffle-btn">Shuffle</button>
-                    <button class="btn" id="repeat-btn">Repeat</button>
-                    <button class="btn" id="ab-btn">A - B</button>
-                    <button class="btn" id="peak-btn">Peak Search</button>
-                    <button class="btn" id="time-btn">Time Mode</button>
-                    <button class="btn" id="vu-toggle-btn">VU</button>
+            <div class="controls-right-stack" style="display: flex; flex-direction: column; gap: 20px;">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <button class="btn" id="rew-btn">◀◀</button><button class="btn" id="fwd-btn">▶▶</button>
+                    <button class="btn" id="minus-10-btn">-10s</button><button class="btn" id="plus-10-btn">+10s</button>
+                    <button class="btn" id="shuffle-btn">Shuffle</button><button class="btn" id="repeat-btn">Repeat</button>
+                    <button class="btn" id="ab-btn">A-B</button><button class="btn" id="peak-btn">Peak</button>
+                    <button class="btn" id="time-btn">Time</button><button class="btn" id="vu-btn">VU</button>
                 </div>
                 
-                <div style="display: flex; gap: 60px; align-items: center; justify-content: center; margin-top: 10px;">
-                    <div style="text-align:center;">
-                        <span style="font-size:10px; color:white; font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Phones Vol</span>
+                <div style="display: flex; gap: 40px; justify-content: center;">
+                    <div class="knob-container">
+                        <span style="font-size:10px; font-weight:bold; color:white;">PHONES VOL</span>
                         <div class="knob vol-knob" id="vol-knob"></div>
                     </div>
-                    <div style="text-align:center;">
-                        <span style="font-size:10px; color:white; font-weight:bold; text-transform:uppercase; margin-bottom:10px; display:block;">Jog Shuttle</span>
+                    <div class="knob-container">
+                        <span style="font-size:10px; font-weight:bold; color:white;">JOG SHUTTLE</span>
                         <div class="knob jog-knob" id="jog-knob"></div>
                     </div>
                 </div>
@@ -292,212 +276,217 @@
     <script>
         const audio = new Audio();
         audio.crossOrigin = "anonymous";
-        let audioCtx, analyzer, dataArray, playlist = [], currentIndex = 0;
-        
-        let currentVol = 2; 
-        let isShuffle = false, repeatMode = 0, timeMode = 0; 
-        let volTimer = null, pointA = null, pointB = null, isVUOn = true;
-        let inputBuffer = "", inputTimer = null;
-        let jogRotation = 0, isPeaking = false, isStopped = true;
+        let playlist = [], currentIndex = 0;
+        let currentArt = "technics_logo.png", currentMeta = "Technics - Audio Systems - Professional";
+        let repeatMode = 0, isShuffle = false, timeMode = 0, isVUOn = true;
+        let pointA = null, pointB = null;
+        let inputBuffer = "", inputTimeout = null, volDisplayTimeout = null;
+        let audioCtx, analyzer, dataArray;
 
         const gridWrapper = document.getElementById('grid-numbers-wrapper');
         for(let i=1; i<=20; i++) {
-            const span = document.createElement('span');
-            span.className = 'grid-num'; span.id = `gn-${i}`; span.innerText = i;
-            gridWrapper.appendChild(span);
+            const s = document.createElement('span'); s.className='grid-num'; s.id=`gn-${i}`; s.innerText=i; gridWrapper.appendChild(s);
         }
 
-        // --- POPUP ALBUM ART LOGIC ---
-        function openArtModal() {
-            const modal = document.getElementById('art-modal');
-            const img = document.getElementById('art-image');
-            
-            // On essaie de récupérer une image si disponible (certains navigateurs supportent l'aperçu si l'objet est déjà en mémoire)
-            // Comme nous utilisons des fichiers locaux via URL.createObjectURL, les pochettes ne sont pas lues par défaut.
-            // On garde technics_logo.png par défaut.
-            img.src = "technics_logo.png"; 
-            modal.style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('art-modal').style.display = 'none';
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('art-modal');
-            if (event.target == modal) closeModal();
-        }
-
-        function updateTrackGrid() {
-            for(let i=1; i<=20; i++) {
-                const el = document.getElementById(`gn-${i}`);
-                el.classList.remove('loaded', 'active-track');
-                if (i <= playlist.length) el.classList.add('loaded');
-                if (playlist.length > 0 && i === currentIndex + 1) el.classList.add('active-track');
-            }
-            document.getElementById('over-arrow').classList.toggle('active', playlist.length > 20);
-        }
-
-        function updateDig(prefix, value) {
-            const val = Math.floor(Math.abs(value)).toString().padStart(2, '0');
-            const d1 = document.getElementById(`${prefix}-d1`);
-            const d2 = document.getElementById(`${prefix}-d2`);
-            if(d1 && d2) { d1.innerText = val[0]; d2.innerText = val[1]; }
-        }
-
-        function showVolumeOverlay() {
-            document.getElementById('time-group').style.display = 'none';
-            document.getElementById('vol-group').style.display = 'block';
-            clearTimeout(volTimer);
-            volTimer = setTimeout(() => {
-                document.getElementById('time-group').style.display = 'block';
-                document.getElementById('vol-group').style.display = 'none';
+        // --- GESTION VOLUME ---
+        function showVolumeDisplay() {
+            if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+            const timeLabel = document.getElementById('time-label');
+            const timeSep = document.getElementById('time-sep');
+            timeLabel.innerText = "VOLUME";
+            timeSep.style.opacity = "0";
+            let volPerc = Math.round(audio.volume * 100);
+            const s = volPerc.toString().padStart(2, '0');
+            document.getElementById('m-d1').innerText = " ";
+            document.getElementById('m-d2').innerText = s.length > 2 ? s[0] : " ";
+            document.getElementById('s-d1').innerText = s.length > 2 ? s[1] : s[0];
+            document.getElementById('s-d2').innerText = s.length > 2 ? s[2] : s[1];
+            volDisplayTimeout = setTimeout(() => {
+                volDisplayTimeout = null;
+                timeLabel.innerText = "Min : Sec";
+                timeSep.style.opacity = "1";
+                updateTimeDisplay();
             }, 2000);
         }
 
-        function applyPrefs() {
-            audio.volume = currentVol / 100;
-            updateDig('v', currentVol);
-            document.getElementById('vol-knob').style.transform = `rotate(${(currentVol / 100 * 300) - 150}deg)`;
-            document.getElementById('time-label').innerText = ["Min : Sec", "Remain", "Total Remain"][timeMode];
-            document.getElementById('time-sign').classList.toggle('visible', timeMode > 0);
-        }
-
-        function numJump(digit) {
-            clearTimeout(inputTimer);
-            inputBuffer += digit.toString();
-            if (inputBuffer.length > 2) inputBuffer = inputBuffer.slice(-2);
-            updateDig('t', parseInt(inputBuffer));
-            if (inputBuffer.length >= 2) executeJump();
-            else inputTimer = setTimeout(executeJump, 800);
-        }
-
-        function executeJump() {
-            let trackNum = parseInt(inputBuffer);
-            inputBuffer = "";
-            if (playlist.length >= trackNum && trackNum > 0) {
-                loadTrack(trackNum - 1);
+        // --- FONCTION VU-MÈTRE (ON/OFF) ---
+        document.getElementById('vu-btn').onclick = () => {
+            isVUOn = !isVUOn;
+            const labels = [document.getElementById('lbl-L'), document.getElementById('lbl-R')];
+            
+            if (!isVUOn) {
+                // Éteindre tout
+                labels.forEach(l => l.className = 'vu-label'); // Sombre
+                ['meter-L', 'meter-R'].forEach(id => {
+                    const el = document.getElementById(id);
+                    for (let i = 0; i < 40; i++) el.children[i].className = 'meter-segment';
+                });
             } else {
-                updateDig('t', playlist.length > 0 ? currentIndex + 1 : 0);
+                labels.forEach(l => l.className = 'vu-label on');
+            }
+        };
+
+        // --- FONCTION A-B ---
+        document.getElementById('ab-btn').onclick = () => {
+            if (playlist.length === 0) return;
+            const abVfd = document.getElementById('vfd-ab');
+            if (pointA === null) {
+                pointA = audio.currentTime;
+                abVfd.classList.add('active', 'vfd-input-blink');
+            } else if (pointB === null) {
+                if (audio.currentTime > pointA) {
+                    pointB = audio.currentTime;
+                    abVfd.classList.remove('vfd-input-blink');
+                    abVfd.classList.add('active');
+                    audio.currentTime = pointA;
+                }
+            } else {
+                pointA = null; pointB = null;
+                abVfd.classList.remove('active', 'vfd-input-blink');
+            }
+        };
+
+        // --- POWER RESET ---
+        document.getElementById('power-reset-btn').onclick = () => {
+            audio.pause(); audio.src = ""; audio.volume = 0.02;
+            document.getElementById('vol-knob').style.transform = `rotate(-110deg)`;
+            playlist = []; currentIndex = 0; pointA = null; pointB = null;
+            document.querySelectorAll('.vfd-indicator').forEach(el => el.classList.remove('active', 'vfd-input-blink'));
+            updateDig('t', 0); updateGrid();
+            document.getElementById('tray-front').classList.add('open');
+            showVolumeDisplay();
+        };
+
+        // --- TRANSPORT ---
+        document.getElementById('play-btn').onclick = () => {
+            if (!playlist.length) return;
+            audio.paused ? audio.play() : audio.pause();
+            document.getElementById('main-time-display').classList.toggle('vfd-blink-dim', audio.paused);
+        };
+
+        document.getElementById('stop-btn').onclick = () => { 
+            audio.pause(); audio.currentTime = 0; 
+            document.getElementById('main-time-display').classList.remove('vfd-blink-dim'); 
+            updateTimeDisplay();
+        };
+
+        function setupKnob(id, callback) {
+            const el = document.getElementById(id);
+            let startY, startRot = (id === 'vol-knob' ? -110 : 0);
+            let currentRot = startRot;
+            el.onmouseenter = () => { if(id === 'vol-knob') showVolumeDisplay(); };
+            el.onmousedown = (e) => {
+                startY = e.clientY;
+                document.onmousemove = (me) => {
+                    let diff = (startY - me.clientY);
+                    currentRot = startRot + diff;
+                    el.style.transform = `rotate(${currentRot}deg)`;
+                    callback(diff);
+                    if(id === 'vol-knob') showVolumeDisplay();
+                };
+                document.onmouseup = () => { startRot = currentRot; document.onmousemove = null; };
+            };
+        }
+
+        setupKnob('vol-knob', (diff) => { audio.volume = Math.max(0, Math.min(1, audio.volume + (diff / 5000))); });
+        setupKnob('jog-knob', (diff) => { if(!audio.paused) audio.currentTime += (diff / 100); });
+
+        function updateDig(prefix, val) {
+            const s = Math.floor(Math.abs(val)).toString().padStart(2, '0');
+            document.getElementById(`${prefix}-d1`).innerText = s[s.length-2] || "0";
+            document.getElementById(`${prefix}-d2`).innerText = s[s.length-1] || "0";
+        }
+
+        function updateTimeDisplay() {
+            if(volDisplayTimeout) return; 
+            let d = timeMode === 0 ? audio.currentTime : (audio.duration || 0) - audio.currentTime;
+            const mins = Math.floor(d / 60).toString().padStart(2, '0');
+            const secs = Math.floor(d % 60).toString().padStart(2, '0');
+            document.getElementById('m-d1').innerText = mins[mins.length-2] || "0";
+            document.getElementById('m-d2').innerText = mins[mins.length-1] || "0";
+            document.getElementById('s-d1').innerText = secs[secs.length-2] || "0";
+            document.getElementById('s-d2').innerText = secs[secs.length-1] || "0";
+        }
+
+        function updateGrid() {
+            for(let i=1; i<=20; i++) {
+                const el = document.getElementById(`gn-${i}`);
+                el.classList.toggle('loaded', i <= playlist.length);
+                el.classList.toggle('active-track', i === currentIndex + 1 && playlist.length > 0);
             }
         }
 
-        audio.onended = () => {
-            if (repeatMode === 1) { audio.currentTime = 0; audio.play(); } 
-            else if (repeatMode === 2) { loadTrack((currentIndex + 1) % playlist.length); } 
-            else if (isShuffle) { loadTrack(Math.floor(Math.random() * playlist.length)); } 
-            else if (currentIndex < playlist.length - 1) { loadTrack(currentIndex + 1); }
-        };
-
         function loadTrack(idx) {
             if (!playlist.length) return;
-            currentIndex = Math.max(0, Math.min(idx, playlist.length - 1));
+            currentIndex = (idx + playlist.length) % playlist.length;
             audio.src = URL.createObjectURL(playlist[currentIndex]);
             updateDig('t', currentIndex + 1);
-            updateTrackGrid();
-            audio.play().catch(() => {});
-            setupAudio();
+            updateGrid(); audio.play();
+            document.getElementById('main-time-display').classList.remove('vfd-blink-dim'); 
+            setupAudio(); extractMetadata(playlist[currentIndex]);
         }
 
-        document.getElementById('peak-btn').onclick = () => {
-            if (!playlist.length || isPeaking) return;
-            isPeaking = true; audio.pause();
-            let scanProgress = 0; const duration = audio.duration || 180;
-            document.getElementById('main-time-display').classList.add('vfd-blink-blue');
-            const scanInterval = setInterval(() => {
-                scanProgress += (duration / 20);
-                updateDig('m', scanProgress / 60); updateDig('s', scanProgress % 60);
-                if (scanProgress >= duration) {
-                    clearInterval(scanInterval);
-                    setTimeout(() => {
-                        audio.currentTime = 0; updateDig('m', 0); updateDig('s', 0);
-                        document.getElementById('main-time-display').classList.remove('vfd-blink-blue');
-                        isPeaking = false;
-                    }, 500);
+        audio.ontimeupdate = () => {
+            if (pointA !== null && pointB !== null && audio.currentTime >= pointB) audio.currentTime = pointA;
+            updateTimeDisplay();
+        };
+
+        function handleNumKey(num) {
+            if (!playlist.length) return;
+            clearTimeout(inputTimeout);
+            inputBuffer += num;
+            document.getElementById('track-vfd-box').classList.add('vfd-input-blink');
+            updateDig('t', parseInt(inputBuffer));
+            if (inputBuffer.length >= 2) executeJump();
+            else inputTimeout = setTimeout(() => { executeJump(); }, 2000);
+        }
+
+        function executeJump() {
+            document.getElementById('track-vfd-box').classList.remove('vfd-input-blink');
+            let trackNum = parseInt(inputBuffer);
+            if (!isNaN(trackNum) && trackNum > 0 && trackNum <= playlist.length) loadTrack(trackNum - 1);
+            else updateDig('t', currentIndex + 1);
+            inputBuffer = "";
+        }
+
+        function extractMetadata(file) {
+            jsmediatags.read(file, {
+                onSuccess: (tag) => {
+                    const t = tag.tags;
+                    currentMeta = `${t.artist || "Unknown Artist"} - ${t.album || "Unknown Album"} - ${t.title || file.name}`;
+                    const p = t.picture;
+                    if (p) {
+                        let b64 = ""; for(let i=0; i<p.data.length; i++) b64 += String.fromCharCode(p.data[i]);
+                        currentArt = `data:${p.format};base64,${window.btoa(b64)}`;
+                    } else { currentArt = "technics_logo.png"; }
+                },
+                onError: () => {
+                    currentMeta = `Unknown - Unknown - ${file.name}`;
+                    currentArt = "technics_logo.png";
                 }
-            }, 100);
+            });
+        }
+
+        document.getElementById('file-input').onchange = (e) => { 
+            playlist = Array.from(e.target.files); 
+            if(playlist.length) { document.getElementById('tray-front').classList.remove('open'); loadTrack(0); }
         };
 
-        document.getElementById('power-reset-btn').onclick = () => {
-            audio.pause(); audio.src = ""; playlist = []; currentIndex = 0;
-            currentVol = 2; inputBuffer = ""; pointA = null; pointB = null; 
-            isShuffle = false; repeatMode = 0; timeMode = 0; isStopped = true;
-            document.getElementById('file-input').value = "";
-            document.querySelectorAll('.vfd-indicator').forEach(el => el.classList.remove('active', 'vfd-blink-blue'));
-            document.getElementById('main-time-display').classList.remove('vfd-blink-dim');
-            applyPrefs(); updateDig('t', 0); updateDig('m', 0); updateDig('s', 0);
-            updateTrackGrid(); document.getElementById('tray-front').classList.remove('open');
-            showVolumeOverlay();
-        };
-
-        document.getElementById('minus-10-btn').onclick = () => { if(playlist.length) audio.currentTime = Math.max(0, audio.currentTime - 10); };
-        document.getElementById('plus-10-btn').onclick = () => { if(playlist.length) audio.currentTime = Math.min(audio.duration, audio.currentTime + 10); };
-
-        document.getElementById('next-btn').onclick = () => {
-            if (isShuffle && playlist.length > 1) { loadTrack(Math.floor(Math.random() * playlist.length)); } 
-            else loadTrack(currentIndex + 1);
-        };
-        
-        document.getElementById('shuffle-btn').onclick = () => {
-            isShuffle = !isShuffle; document.getElementById('vfd-shuffle').classList.toggle('active', isShuffle);
-        };
-
-        document.getElementById('repeat-btn').onclick = () => {
+        document.getElementById('next-btn').onclick = () => loadTrack(currentIndex + 1);
+        document.getElementById('prev-btn').onclick = () => loadTrack(currentIndex - 1);
+        document.getElementById('eject-btn').onclick = () => document.getElementById('tray-front').classList.toggle('open');
+        document.getElementById('shuffle-btn').onclick = () => { isShuffle = !isShuffle; document.getElementById('vfd-shuffle').classList.toggle('active', isShuffle); };
+        document.getElementById('repeat-btn').onclick = () => { 
             repeatMode = (repeatMode + 1) % 3;
             document.getElementById('vfd-repeat-1').classList.toggle('active', repeatMode === 1);
             document.getElementById('vfd-repeat-all').classList.toggle('active', repeatMode === 2);
         };
-
-        document.getElementById('ab-btn').onclick = () => {
-            if (!playlist.length) return;
-            const abVfd = document.getElementById('vfd-ab');
-            if (pointA === null) { pointA = audio.currentTime; abVfd.classList.add('vfd-blink-blue'); }
-            else if (pointB === null) { pointB = audio.currentTime; abVfd.classList.remove('vfd-blink-blue'); abVfd.classList.add('active'); }
-            else { pointA = null; pointB = null; abVfd.classList.remove('active', 'vfd-blink-blue'); }
-        };
-
-        document.getElementById('vu-toggle-btn').onclick = () => {
-            isVUOn = !isVUOn; document.querySelectorAll('.vu-label').forEach(l => l.classList.toggle('active', isVUOn));
-        };
-
-        document.getElementById('time-btn').onclick = () => { 
-            timeMode = (timeMode + 1) % 3; applyPrefs(); audio.dispatchEvent(new Event('timeupdate'));
-        };
-
-        audio.onpause = () => { if(!isPeaking && !isStopped) document.getElementById('main-time-display').classList.add('vfd-blink-dim'); };
-        audio.onplay = () => { isStopped = false; document.getElementById('main-time-display').classList.remove('vfd-blink-dim'); };
-
-        audio.ontimeupdate = () => {
-            if (isPeaking || !playlist.length) return;
-            let displayTime = 0; const current = audio.currentTime; const duration = audio.duration || 0;
-            if (timeMode === 0) displayTime = current;
-            else if (timeMode === 1) displayTime = Math.max(0, duration - current);
-            else if (timeMode === 2) {
-                displayTime = Math.max(0, duration - current) + ((playlist.length - 1 - currentIndex) * 180);
-            }
-            updateDig('m', displayTime / 60); updateDig('s', displayTime % 60);
-            if (pointA !== null && pointB !== null && current >= pointB) audio.currentTime = pointA;
-        };
-
-        let isVolActive = false, isJogActive = false;
-        const volKnob = document.getElementById('vol-knob'), jogKnob = document.getElementById('jog-knob');
-        volKnob.onmouseenter = () => showVolumeOverlay();
-        volKnob.onmousedown = () => isVolActive = true;
-        jogKnob.onmousedown = () => isJogActive = true;
-        window.onmouseup = () => { isVolActive = false; isJogActive = false; };
+        document.getElementById('time-btn').onclick = () => { timeMode = (timeMode + 1) % 2; };
         
-        window.onmousemove = (e) => {
-            if (isVolActive) { currentVol = Math.max(0, Math.min(100, currentVol - e.movementY * 0.5)); applyPrefs(); showVolumeOverlay(); }
-            if (isJogActive && playlist.length) {
-                jogRotation += e.movementX; jogKnob.style.transform = `rotate(${jogRotation}deg)`;
-                audio.currentTime += (e.movementX * 0.2); isStopped = false;
-            }
-        };
-
-        const mL = document.getElementById('meter-L'), mR = document.getElementById('meter-R');
-        for(let i=0; i<40; i++) {
-            mL.appendChild(document.createElement('div')).className = 'meter-segment';
-            mR.appendChild(document.createElement('div')).className = 'meter-segment';
+        function openArt() { 
+            document.getElementById('art-image').src = currentArt; 
+            document.getElementById('art-info').innerText = currentMeta;
+            document.getElementById('art-modal').style.display = 'flex'; 
         }
 
         function setupAudio() {
@@ -512,40 +501,23 @@
 
         function renderVU() {
             requestAnimationFrame(renderVU);
-            if (!analyzer) return;
+            if (!analyzer || !isVUOn) return;
             analyzer.getByteFrequencyData(dataArray);
-            [mL, mR].forEach((el, idx) => {
-                const segs = el.children;
-                const active = isVUOn ? Math.floor((dataArray[idx+2]/255) * 40) : 0;
-                for(let i=0; i<40; i++) {
-                    segs[i].className = 'meter-segment' + (i < active ? (i > 34 ? ' on-red' : ' on-blue') : '');
+            ['meter-L', 'meter-R'].forEach((id, idx) => {
+                const el = document.getElementById(id);
+                const val = Math.floor((dataArray[idx + 2] / 255) * 40);
+                for (let i = 0; i < 40; i++) {
+                    el.children[i].className = 'meter-segment' + (i < val ? (i > 34 ? ' on-red' : ' on-blue') : '');
                 }
             });
         }
 
-        document.getElementById('file-input').onchange = (e) => {
-            playlist = Array.from(e.target.files);
-            if(playlist.length) { isStopped = true; loadTrack(0); }
-            document.getElementById('tray-front').classList.remove('open');
-        };
+        ['meter-L', 'meter-R'].forEach(id => {
+            const el = document.getElementById(id);
+            for(let i=0; i<40; i++) el.appendChild(document.createElement('div')).className = 'meter-segment';
+        });
 
-        document.getElementById('eject-btn').onclick = () => document.getElementById('tray-front').classList.toggle('open');
-        document.getElementById('play-btn').onclick = () => { 
-            if(playlist.length) {
-                if (audio.paused) { isStopped = false; audio.play(); } else audio.pause();
-            }
-        };
-        document.getElementById('stop-btn').onclick = () => { 
-            isStopped = true; audio.pause(); audio.currentTime = 0; 
-            document.getElementById('main-time-display').classList.remove('vfd-blink-dim');
-        };
-        document.getElementById('prev-btn').onclick = () => loadTrack(currentIndex - 1);
-        document.getElementById('fwd-btn').onclick = () => { isStopped = false; audio.currentTime += 5; };
-        document.getElementById('rew-btn').onclick = () => { isStopped = false; audio.currentTime -= 5; };
-
-        document.getElementById('lab-L').classList.add('active');
-        document.getElementById('lab-R').classList.add('active');
-        applyPrefs(); updateTrackGrid();
+        audio.volume = 0.02;
     </script>
 </body>
 </html>
