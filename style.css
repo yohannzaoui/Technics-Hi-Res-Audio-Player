@@ -23,8 +23,8 @@ body {
 }
 
 .deck-container {
-    width: 1200px; background-color: var(--deck-gray);
-    padding: 10px 50px 40px 50px; border-top: 1px solid #333;
+    width: 1600px; background-color: var(--deck-gray);
+    padding: 25px 120px 60px 120px; border-top: 1px solid #333;
     border-radius: 4px; box-shadow: 0 80px 150px rgba(0,0,0,1);
     position: relative;
     z-index: 1;
@@ -32,7 +32,7 @@ body {
 
 .brand-header {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px solid #222;
+    margin-bottom: 25px; padding-bottom: 12px; border-bottom: 1px solid #222;
 }
 
 .main-logo { height: 20px; display: block; opacity: 0.9; }
