@@ -6,6 +6,9 @@ let repeatMode = 0, isRandom = false, timeMode = 0, isVUOn = true;
 let pointA = null, pointB = null, isPeakSearching = false;
 let inputBuffer = "", inputTimeout = null, volDisplayTimeout = null;
 let audioCtx, analyzer, dataArray, searchInterval = null;
+let preMuteVolume = 0.02;
+let isMuted = false;
+let volRepeatInterval = null;
 
 const gridWrapper = document.getElementById('grid-numbers-wrapper');
 for(let i=1; i<=20; i++) {
@@ -20,21 +23,83 @@ function showVolumeDisplay() {
     if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
     const timeLabel = document.getElementById('time-label');
     const timeSep = document.getElementById('time-sep');
-    timeLabel.innerText = "VOLUME";
+    
+    if (isMuted) {
+        timeLabel.innerText = "MUTE";
+        document.getElementById('m-d1').innerText = " ";
+        document.getElementById('m-d2').innerText = " ";
+        document.getElementById('s-d1').innerText = "0";
+        document.getElementById('s-d2').innerText = "0";
+    } else {
+        timeLabel.innerText = "VOLUME";
+        let volPerc = Math.round(audio.volume * 99);
+        const s = volPerc.toString().padStart(2, '0');
+        document.getElementById('m-d1').innerText = " ";
+        document.getElementById('m-d2').innerText = " ";
+        document.getElementById('s-d1').innerText = s[0];
+        document.getElementById('s-d2').innerText = s[1];
+    }
     timeSep.style.opacity = "0";
-    let volPerc = Math.round(audio.volume * 100);
-    const s = volPerc.toString().padStart(2, '0');
-    document.getElementById('m-d1').innerText = " ";
-    document.getElementById('m-d2').innerText = s.length > 2 ? s[0] : " ";
-    document.getElementById('s-d1').innerText = s.length > 2 ? s[1] : s[0];
-    document.getElementById('s-d2').innerText = s.length > 2 ? s[2] : s[1];
-    volDisplayTimeout = setTimeout(() => {
-        volDisplayTimeout = null;
-        timeLabel.innerText = timeMode === 0 ? "Min : Sec" : "- Min : Sec";
-        timeSep.style.opacity = "1";
-        updateTimeDisplay();
-    }, 2000);
 }
+
+function hideVolumeDisplay() {
+    if (isMuted) return;
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    const timeLabel = document.getElementById('time-label');
+    const timeSep = document.getElementById('time-sep');
+    timeLabel.innerText = timeMode === 0 ? "Min : Sec" : "- Min : Sec";
+    timeSep.style.opacity = "1";
+    updateTimeDisplay();
+}
+
+const volUp = document.getElementById('vol-up-btn');
+const volDown = document.getElementById('vol-down-btn');
+const muteBtn = document.getElementById('mute-btn');
+
+[volUp, volDown].forEach(btn => {
+    btn.onmouseenter = showVolumeDisplay;
+    btn.onmouseleave = () => {
+        stopVolRepeat();
+        hideVolumeDisplay();
+    };
+});
+
+function startVolRepeat(dir) {
+    stopVolRepeat();
+    isMuted = false;
+    const adjust = () => {
+        if (dir === 1) audio.volume = Math.min(1, audio.volume + (1/99));
+        else audio.volume = Math.max(0, audio.volume - (1/99));
+        showVolumeDisplay();
+    };
+    adjust(); // Premier clic immédiat
+    volRepeatInterval = setInterval(adjust, 100); // Répétition toutes les 100ms
+}
+
+function stopVolRepeat() {
+    if (volRepeatInterval) {
+        clearInterval(volRepeatInterval);
+        volRepeatInterval = null;
+    }
+}
+
+volUp.onmousedown = () => startVolRepeat(1);
+volUp.onmouseup = stopVolRepeat;
+volDown.onmousedown = () => startVolRepeat(-1);
+volDown.onmouseup = stopVolRepeat;
+
+muteBtn.onclick = () => {
+    if (!isMuted) {
+        preMuteVolume = audio.volume;
+        audio.volume = 0;
+        isMuted = true;
+        showVolumeDisplay();
+    } else {
+        audio.volume = preMuteVolume;
+        isMuted = false;
+        hideVolumeDisplay();
+    }
+};
 
 function startSearch(dir) {
     if (!playlist.length || isPeakSearching) return;
@@ -132,12 +197,12 @@ document.getElementById('ab-btn').onclick = () => {
 
 document.getElementById('power-reset-btn').onclick = () => {
     audio.pause(); audio.src = ""; audio.volume = 0.02;
-    document.getElementById('vol-knob').style.transform = `rotate(-110deg)`;
-    playlist = []; currentIndex = 0; pointA = null; pointB = null;
+    playlist = []; currentIndex = 0; pointA = null; pointB = null; isMuted = false;
     document.querySelectorAll('.vfd-indicator').forEach(el => el.classList.remove('active', 'vfd-input-blink'));
     updateDig('t', 0); updateGrid();
     document.getElementById('tray-front').classList.add('open');
     showVolumeDisplay();
+    setTimeout(hideVolumeDisplay, 2000);
 };
 
 document.getElementById('play-btn').onclick = () => {
@@ -159,26 +224,6 @@ document.getElementById('stop-btn').onclick = () => {
     updateTimeDisplay();
 };
 
-function setupKnob(id, callback) {
-    const el = document.getElementById(id);
-    let startY, startRot = (id === 'vol-knob' ? -110 : 0), currentRot = startRot;
-    el.onmouseenter = () => { if(id === 'vol-knob') showVolumeDisplay(); };
-    el.onmousedown = (e) => {
-        startY = e.clientY;
-        document.onmousemove = (me) => {
-            let diff = (startY - me.clientY);
-            currentRot = startRot + diff;
-            el.style.transform = `rotate(${currentRot}deg)`;
-            callback(diff);
-            if(id === 'vol-knob') showVolumeDisplay();
-        };
-        document.onmouseup = () => { startRot = currentRot; document.onmousemove = null; };
-    };
-}
-
-setupKnob('vol-knob', (diff) => { audio.volume = Math.max(0, Math.min(1, audio.volume + (diff / 5000))); });
-setupKnob('jog-knob', (diff) => { if(!audio.paused) audio.currentTime += (diff / 100); });
-
 function updateDig(prefix, val) {
     const s = Math.floor(Math.abs(val)).toString().padStart(2, '0');
     document.getElementById(`${prefix}-d1`).innerText = s[s.length-2] || "0";
@@ -186,7 +231,8 @@ function updateDig(prefix, val) {
 }
 
 function updateTimeDisplay() {
-    if(volDisplayTimeout || isPeakSearching) return; 
+    const timeLabel = document.getElementById('time-label');
+    if(timeLabel.innerText === "VOLUME" || timeLabel.innerText === "MUTE" || isPeakSearching) return; 
     let d = timeMode === 0 ? audio.currentTime : (audio.duration || 0) - audio.currentTime;
     const mins = Math.floor(d / 60).toString().padStart(2, '0'), secs = Math.floor(d % 60).toString().padStart(2, '0');
     document.getElementById('m-d1').innerText = mins[mins.length-2] || "0";
