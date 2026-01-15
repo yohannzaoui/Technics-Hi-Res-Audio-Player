@@ -1,7 +1,7 @@
 const audio = new Audio();
 audio.crossOrigin = "anonymous";
 let playlist = [], currentIndex = 0;
-let currentArt = "img/favicon.png", currentMeta = "Technics - Audio Systems - Professional";
+let currentArt = "img/Technics_cover.png", currentMeta = "Technics - CD Player - SL-PS740A";
 let repeatMode = 0, isRandom = false, timeMode = 0, isVUOn = true;
 let pointA = null, pointB = null, isPeakSearching = false;
 let inputBuffer = "", inputTimeout = null, volDisplayTimeout = null;
@@ -326,7 +326,7 @@ function extractMetadata(file) {
             if (p) {
                 let b64 = ""; for(let i=0; i<p.data.length; i++) b64 += String.fromCharCode(p.data[i]);
                 currentArt = `data:${p.format};base64,${window.btoa(b64)}`;
-            } else currentArt = "img/favicon.png";
+            } else currentArt = "img/Technics_cover.png";
             updateMediaSession(); // Re-sync with actual tag metadata
         }
     });
