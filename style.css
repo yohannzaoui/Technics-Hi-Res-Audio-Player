@@ -152,7 +152,7 @@ body {
 
 #power-reset-btn { height: 50px; width: 90px; }
 
-#stop-btn, #eject-btn { font-size: 24px; color: var(--text-silver); }
+#stop-btn, #eject-btn { font-size: 22px; color: var(--text-silver); }
 
 .numeric-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 35px; margin-top: 25px; width: 100%;}
 
