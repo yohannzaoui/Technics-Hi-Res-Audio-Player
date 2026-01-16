@@ -80,7 +80,7 @@ body {
     margin-top: 55px; width: 100%; align-items: end; 
 }
 
-.eject-section { margin-top: -38px; }
+.eject-section { margin-top: -15px; }
 
 .upper-label, .knob-label {
     font-size: 9px; font-weight: bold; color: var(--text-silver);
