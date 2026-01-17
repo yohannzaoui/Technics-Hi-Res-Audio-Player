@@ -621,6 +621,7 @@ body {
     height: 40px !important;
     min-width: 0 !important;
     flex: none !important;
+    margin-bottom: 10px;
 }
 
 /* Style optionnel pour le label (comme tu as demandé précédemment) */
