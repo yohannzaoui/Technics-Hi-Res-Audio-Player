@@ -271,7 +271,13 @@ function loadTrack(idx) {
         idx = Math.floor(Math.random() * playlist.length);
     }
     currentIndex = (idx + playlist.length) % playlist.length;
+    const currentFile = playlist[currentIndex];
     audio.src = URL.createObjectURL(playlist[currentIndex]);
+    const formatDisplay = document.getElementById('file-format-display');
+    if (formatDisplay && currentFile.name) {
+        // split('.') coupe le nom au point, pop() prend le dernier morceau (l'extension)
+        formatDisplay.innerText = currentFile.name.split('.').pop().toUpperCase();
+    }
     updateDig('t', currentIndex + 1);
     updateGrid(); 
     audio.play();
@@ -417,3 +423,4 @@ if ('serviceWorker' in navigator) {
             .catch(err => console.log('Service Worker Error', err));
     });
 }
+

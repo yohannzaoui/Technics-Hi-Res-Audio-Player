@@ -21,7 +21,7 @@
 
     <div id="playlist-modal" onclick="this.style.display='none'">
         <div class="modal-content list-content" onclick="event.stopPropagation()">
-            <h3 style="color:var(--vfd-blue); margin-top:0; letter-spacing:2px;">COMPACT DISC TRACK LIST</h3>
+            <h3 style="color:var(--vfd-blue); margin-top:0; letter-spacing:2px;">TRACK LIST</h3>
             <div id="track-list-container"></div>
             <button class="btn" style="margin-top:20px; height:35px; width:100px; margin-left:auto; margin-right:auto;" onclick="document.getElementById('playlist-modal').style.display='none'">CLOSE</button>
         </div>
@@ -31,7 +31,6 @@
         <img src="img/compact_disc_w.png" class="cd-logo-bottom" alt="Compact Disc Digital Audio">
 
         <header class="brand-header">
-            <a href="index2.html" class="invisible-link">
                 <img src="img/Technics_logo.png" class="main-logo" alt="Technics">
             </a>
             <div class="model-name">Stereo Compact Disc Player SL-PS740A</div>
@@ -60,6 +59,7 @@
                             <span class="label-vfd clickable" id="track-label" onclick="openArt()">Track</span>
                             <div class="digital-counter">
                                 <span id="t-d1" class="digit">0</span><span id="t-d2" class="digit">0</span>
+                                <span id="file-format-display" class="file-format" onclick="openArt()">---</span>
                             </div>
                         </div>
 
@@ -142,12 +142,13 @@
                     <button class="btn" id="vu-btn">VU</button>
                 </div>
                 
+                
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 50px;">
-                    <span class="knob-label">VOLUME</span>
+                    <span class="volume-label">VOLUME</span>
                     <div style="display: flex; gap: 10px;">
-                        <button class="btn" id="vol-down-btn" style="width: 60px;">VOL-</button>
-                        <button class="btn" id="mute-btn" style="width: 60px;">MUTE</button>
-                        <button class="btn" id="vol-up-btn" style="width: 60px;">VOL+</button>
+                        <button class="btn" id="vol-down-btn">VOL-</button>
+                        <button class="btn" id="mute-btn">MUTE</button>
+                        <button class="btn" id="vol-up-btn">VOL+</button>
                     </div>
                 </div>
             </div>
@@ -157,3 +158,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
+
