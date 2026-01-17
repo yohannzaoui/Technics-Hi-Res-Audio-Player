@@ -178,14 +178,16 @@ document.getElementById('vu-btn').onclick = () => {
     } else labels.forEach(l => l.className = 'vu-label on');
 };
 
+
+// Appelle cette fonction à chaque clic A/B
 document.getElementById('ab-btn').onclick = () => {
     if (playlist.length === 0) return;
     const abVfd = document.getElementById('vfd-ab');
+
     if (pointA === null) { 
         pointA = audio.currentTime; 
         abVfd.classList.add('active', 'vfd-input-blink'); 
-    }
-    else if (pointB === null) {
+    } else if (pointB === null) {
         if (audio.currentTime > pointA) { 
             pointB = audio.currentTime; 
             abVfd.classList.remove('vfd-input-blink'); 
@@ -197,6 +199,8 @@ document.getElementById('ab-btn').onclick = () => {
         pointB = null; 
         abVfd.classList.remove('active', 'vfd-input-blink'); 
     }
+
+    renderABLoop(); // met à jour la barre
 };
 
 document.getElementById('power-reset-btn').onclick = () => {
