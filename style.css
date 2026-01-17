@@ -764,3 +764,52 @@ body {
     margin-bottom: -10px;    /* Espace entre le mot et la trappe */
     transition: all 0.3s;  /* Optionnel : pour un mouvement fluide si tu le modifies */
 }
+
+.tone-controls-section {
+    width: 100%;
+    display: flex;
+    justify-content: center; /* Centre horizontalement */
+    align-items: center;
+
+    /* CONTRÔLE INDÉPENDANT DES MARGES */
+    margin-top: 10px;    /* Ajuste l'espace avec ce qui est AU-DESSUS */
+    margin-bottom: -60px; /* Ajuste l'espace avec la rangée EJECT en DESSOUS */
+    
+    /* Optionnel : si tu veux voir la zone pendant que tu règles */
+    /* border: 1px dashed rgba(255,255,255,0.1); */
+}
+
+/* Aligne les deux groupes Bass et Treble sur une ligne */
+.tone-controls-row {
+    display: flex;
+    gap: 60px; /* Espace généreux entre Bass et Treble pour la clarté */
+}
+
+/* Centre le texte au-dessus des boutons */
+.tone-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px; /* Espace entre le mot et les boutons */
+}
+
+.tone-group .upper-label {
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin-bottom: -5px;
+}
+
+/* Style des boutons de tonalité */
+.btn-tone {
+    width: 90px !important;
+    height: 45px !important;
+    font-size: 18px !important;
+    min-width: 0 !important;
+    flex: none !important;
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+}

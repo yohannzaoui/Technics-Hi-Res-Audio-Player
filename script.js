@@ -9,7 +9,10 @@ let audioCtx, analyzer, dataArray, searchInterval = null;
 let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
-let vuMultiplier = 1.2; 
+let vuMultiplier = 1.2;
+let bassFilter, trebleFilter;
+let bassLevel = 0;   
+let trebleLevel = 0;
 
 const gridWrapper = document.getElementById('grid-numbers-wrapper');
 for(let i=1; i<=20; i++) {
@@ -233,7 +236,8 @@ function updateDig(prefix, val) {
 
 function updateTimeDisplay() {
     const timeLabel = document.getElementById('time-label');
-    if(timeLabel.innerText === "VOLUME" || timeLabel.innerText === "MUTE" || timeLabel.innerText === "VU SENSE" || isPeakSearching) return; 
+    if(timeLabel.innerText === "VOLUME" || timeLabel.innerText === "MUTE" || timeLabel.innerText === "VU SENSE" || timeLabel.innerText === "BASS" || 
+       timeLabel.innerText === "TREBLE" ||isPeakSearching) return; 
     let d = timeMode === 0 ? audio.currentTime : (audio.duration || 0) - audio.currentTime;
     const mins = Math.floor(d / 60).toString().padStart(2, '0'), secs = Math.floor(d % 60).toString().padStart(2, '0');
     document.getElementById('m-d1').innerText = mins[mins.length-2] || "0";
@@ -407,9 +411,29 @@ function setupAudio() {
     if (audioCtx) return;
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const src = audioCtx.createMediaElementSource(audio);
-    analyzer = audioCtx.createAnalyser(); analyzer.fftSize = 64;
-    src.connect(analyzer); analyzer.connect(audioCtx.destination);
+    
+    // Création des filtres
+    bassFilter = audioCtx.createBiquadFilter();
+    bassFilter.type = "lowshelf";
+    bassFilter.frequency.value = 200;
+    bassFilter.gain.value = bassLevel;
+
+    trebleFilter = audioCtx.createBiquadFilter();
+    trebleFilter.type = "highshelf";
+    trebleFilter.frequency.value = 3000;
+    trebleFilter.gain.value = trebleLevel;
+
+    // Analyseur pour le VUMètre
+    analyzer = audioCtx.createAnalyser(); 
+    analyzer.fftSize = 64;
     dataArray = new Uint8Array(analyzer.frequencyBinCount);
+
+    // CHAÎNE DE CONNEXION : Source -> Bass -> Treble -> Analyser -> Sortie
+    src.connect(bassFilter);
+    bassFilter.connect(trebleFilter);
+    trebleFilter.connect(analyzer);
+    analyzer.connect(audioCtx.destination);
+
     renderVU();
 }
 
@@ -492,5 +516,51 @@ function toggleVUHatch() {
         hatch.classList.remove('hatch-open');
         hatch.classList.add('hatch-closed');
     }
+}
+
+
+function adjustBass(change) {
+    // On limite entre -10 et +10 dB
+    bassLevel = Math.max(-10, Math.min(10, bassLevel + change));
+    if (bassFilter) {
+        bassFilter.gain.setTargetAtTime(bassLevel, audioCtx.currentTime, 0.01);
+    }
+    showToneDisplay("BASS", bassLevel);
+}
+
+function adjustTreble(change) {
+    trebleLevel = Math.max(-10, Math.min(10, trebleLevel + change));
+    if (trebleFilter) {
+        trebleFilter.gain.setTargetAtTime(trebleLevel, audioCtx.currentTime, 0.01);
+    }
+    showToneDisplay("TREBLE", trebleLevel);
+}
+
+function showToneDisplay(label, value) {
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    
+    const timeLabel = document.getElementById('time-label');
+    const timeSep = document.getElementById('time-sep');
+    
+    timeLabel.innerText = label;
+    timeSep.style.opacity = "0";
+
+    // Affichage du signe (+ ou -) et de la valeur
+    const sign = value >= 0 ? "+" : "-";
+    const valStr = Math.abs(value).toString().padStart(2, '0');
+    
+    document.getElementById('m-d1').innerText = sign;
+    document.getElementById('m-d2').innerText = " ";
+    document.getElementById('s-d1').innerText = valStr[0];
+    document.getElementById('s-d2').innerText = valStr[1];
+
+    // Retour à l'affichage normal après 1.5s
+    volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
+}
+
+// Lance le délai de 1.5s quand la souris quitte les boutons Tone
+function startToneTimeout() {
+    if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
+    volDisplayTimeout = setTimeout(hideVolumeDisplay, 1500);
 }
 
