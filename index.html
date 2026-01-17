@@ -108,11 +108,12 @@
 
        <div class="tone-controls-section">
     <div class="tone-group-wrapper">
-        <span class="upper-label">TONE CONTROL</span>
+        
         
         <div class="tone-hatch-frame" onclick="toggleToneHatch()">
             <div id="tone-hatch-block" class="hatch-closed">
                 <div class="hatch-texture"></div>
+                <span class="hatch-label">TONE CONTROL</span>
             </div>
             
             <div class="tone-controls-row">
@@ -140,7 +141,7 @@
                         <button class="btn btn-tone" 
                             onmouseenter="showToneDisplay('TREBLE', trebleLevel)" 
                             onmouseleave="startToneTimeout()" 
-                            onclick="event.stopPropagation(); adjustTreble(2)">Trebel +</button>
+                            onclick="event.stopPropagation(); adjustTreble(2)">Treble +</button>
                     </div>
                 </div>
             </div>
@@ -197,11 +198,12 @@
                         <button class="btn" id="vol-up-btn">VOL +</button>
                     </div>
                     <div class="vu-sense-group">
-    <span class="upper-label">VU SENSE</span>
+    
     
     <div class="vu-hatch-frame" onclick="toggleVUHatch()">
         <div id="vu-hatch-block" class="hatch-closed">
             <div class="hatch-texture"></div>
+            <span class="hatch-label">VU SENSE</span>
         </div>
         
         <div class="vu-controls-container">

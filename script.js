@@ -408,7 +408,10 @@ function openArt() {
 }
 
 function setupAudio() {
-    if (audioCtx) return;
+    if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume();
+    return;
+}
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const src = audioCtx.createMediaElementSource(audio);
     
@@ -473,7 +476,7 @@ if ('serviceWorker' in navigator) {
 }
 
 
-f// Affiche la sensibilité au survol
+// Affiche la sensibilité au survol
 function showVUSense() {
     if (volDisplayTimeout) clearTimeout(volDisplayTimeout);
     
