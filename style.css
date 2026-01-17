@@ -734,14 +734,15 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px; /* Espace entre le mot et les boutons */
+    gap: 1px; /* Espace entre le mot et les boutons */
 }
 
-.tone-group .upper-label {
-    display: block;
+.tone-group-wrapper .upper-label {
+    display: block !important; /* Force l'élément à se comporter comme un bloc */
+    position: relative !important; /* Permet d'utiliser top/bottom */
+    top: 5px !important; /* Ajuste cette valeur : 20px pour descendre, -20px pour monter */
     text-align: center;
     width: 100%;
-    margin-bottom: -5px;
 }
 
 /* Style des boutons de tonalité */
