@@ -9,10 +9,11 @@ let audioCtx, analyzer, dataArray, searchInterval = null;
 let preMuteVolume = 0.02;
 let isMuted = false;
 let volRepeatInterval = null;
-let vuMultiplier = 1.2;
+let vuMultiplier = 1;
 let bassFilter, trebleFilter;
 let bassLevel = 0;   
 let trebleLevel = 0;
+let volumeBeforeSearch = 0.02;
 
 
 const gridWrapper = document.getElementById('grid-numbers-wrapper');
@@ -87,7 +88,7 @@ function startVolRepeat(dir) {
         showVolumeDisplay();
     };
     adjust();
-    volRepeatInterval = setInterval(adjust, 300);
+    volRepeatInterval = setInterval(adjust, 200);
 }
 
 function stopVolRepeat() {
@@ -117,25 +118,51 @@ muteBtn.onclick = () => {
 
 function startSearch(dir) {
     if (!playlist.length || isPeakSearching) return;
-    audio.muted = true;
-    searchInterval = setInterval(() => {
-        audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + (dir * 2)));
-        updateTimeDisplay();
-    }, 100);
-}
+    
+    if (!searchInterval && audio.playbackRate === 1.0) {
+        volumeBeforeSearch = audio.volume;
+        audio.volume = volumeBeforeSearch * 0.5; 
+    }
 
-function stopSearch() {
-    if (searchInterval) {
-        clearInterval(searchInterval);
-        searchInterval = null;
-        audio.muted = false;
+    if (dir === 1) {
+        // AVANCE RAPIDE : Vitesse x4
+        audio.playbackRate = 4.0; 
+    } else {
+        // RETOUR RAPIDE SYNCHRONISÉ :
+        // Pour faire du x4, on doit reculer de 0.2s toutes les 50ms (0.2 / 0.05 = 4)
+        if (searchInterval) clearInterval(searchInterval);
+        searchInterval = setInterval(() => {
+            audio.currentTime = Math.max(0, audio.currentTime - 0.2);
+            updateTimeDisplay();
+        }, 50);
     }
 }
 
+function stopSearch() {
+    if (audio.playbackRate === 1.0 && !searchInterval) return;
+
+    if (searchInterval) {
+        clearInterval(searchInterval);
+        searchInterval = null;
+    }
+    
+    audio.playbackRate = 1.0;
+    
+    if (!isMuted) {
+        audio.volume = volumeBeforeSearch;
+    } else {
+        audio.volume = 0;
+    }
+}
+
+// LIAISON AUX BOUTONS : On utilise uniquement les événements de CLIC
 document.getElementById('fwd-btn').onmousedown = () => startSearch(1);
 document.getElementById('fwd-btn').onmouseup = stopSearch;
+document.getElementById('fwd-btn').onmouseleave = stopSearch; // Sécurité si la souris sort du bouton
+
 document.getElementById('rew-btn').onmousedown = () => startSearch(-1);
 document.getElementById('rew-btn').onmouseup = stopSearch;
+document.getElementById('rew-btn').onmouseleave = stopSearch; // Sécurité si la souris sort du bouton
 
 document.getElementById('plus-10-btn').onclick = () => {
     if (!playlist.length) return;
