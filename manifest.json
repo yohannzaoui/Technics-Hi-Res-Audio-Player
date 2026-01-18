@@ -1,7 +1,7 @@
 {
-  "name": "Technics SL-PS740A",
-  "short_name": "SL-PS740A",
-  "description": "Technics SL-PS740A CD Player",
+  "name": "Technics Hi-Res Player",
+  "short_name": "Technics Hi-Res Player",
+  "description": "Technics High Resolution Audio Player",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#080808",
