@@ -1,123 +1,80 @@
 ---
-
-# 🎵 Technics SL-PS740A User Manual
-
-This digital interface is a high-fidelity recreation of the legendary **Technics SL-PS740A Compact Disc Player**, featuring:
-
-* Professional-grade **Virtual Fluorescent Display (VFD)**
-* High-precision **VU meters**
-* Advanced **track management**
-* Realistic **tone and playback controls**
-
+title: "Technics SL-PS740A User Manual"
+description: "High-fidelity digital recreation of the Technics SL-PS740A CD player with VFD, VU meters, and advanced track management."
 ---
 
-## 🔹 Key Features
+# Technics SL-PS740A User Manual
 
-<details>
-<summary>1️⃣ Professional Transport and Mechanism</summary>
+This digital interface is a high-fidelity recreation of the legendary Technics SL-PS740A Compact Disc player. It features a professional-grade Virtual Fluorescent Display (VFD), high-precision VU meters, and advanced track management.
 
-* **⚡ POWER**: Resets the player, clears the current playlist, and opens the disc tray.
-* **📂 OPEN-CLOSE**: Toggles the CD tray mechanism.
-* **▶️ PLAY-PAUSE**: Starts or pauses playback. The time display flashes when paused.
-* **⏹ STOP**: Stops playback and resets the current track to the beginning.
-* **⏪⏩ SEARCH**: Hold the rewind or fast-forward buttons to scan through a track with audio muted.
+## Key Features
 
-</details>
+### 1. Professional Transport and Mechanism
 
-<details>
-<summary>2️⃣ Advanced Audio Controls</summary>
+- **POWER**: Resets the player, clears the current playlist, and opens the disc tray.
+- **OPEN-CLOSE**: Toggles the CD tray mechanism.
+- **PLAY-PAUSE**: Starts or pauses playback. The time display flashes when paused.
+- **STOP**: Stops playback and resets the current track to the beginning.
+- **SEARCH**: Hold the rewind or fast-forward buttons to scan through a track with audio muted.
 
-* **🔊 VOLUME BUTTONS**
+### 2. Advanced Audio Controls
 
-  * **Auto-Repeat**: Hold VOL+ or VOL- to adjust continuously.
-  * **Precision**: Adjusts in 1% increments (0–99).
-  * **Persistent Mute**: Press MUTE to silence audio. Volume level is remembered when unmuted.
+- **VOLUME BUTTONS**
+  - **Auto-Repeat**: Hold VOL+ or VOL- to adjust the volume continuously.
+  - **Precision**: Adjusts in 1% increments (0–99).
+  - **Persistent Mute**: Press MUTE to silence audio. Volume is remembered when unmuted.
 
-* **🎚️ TONE CONTROL (Hidden Panel)**
+- **TONE CONTROL (Hidden Panel)**
+  - Click the **TONE CONTROL** hatch to reveal hidden sliders.
+  - **BASS**: Adjust low-end frequencies from -10 dB to +10 dB.
+  - **TREBLE**: Adjust high-end frequencies from -10 dB to +10 dB.
+  - **Visual Feedback**: Hovering or clicking these buttons displays the current level (e.g., "BASS +04") on the VFD.
 
-  * Click the **TONE CONTROL** hatch to reveal hidden sliders.
-  * **BASS**: Adjust low-end frequencies (-10 dB → +10 dB)
-  * **TREBLE**: Adjust high-end frequencies (-10 dB → +10 dB)
-  * **Visual Feedback**: Hovering/clicking displays the current level on the VFD (e.g., "BASS +04")
+- **PEAK SEARCH**: Scans the entire track to find the highest decibel level. The VFD displays "PEAK SEARCH" and the VU meters lock onto the peak value.
 
-* **📈 PEAK SEARCH**: Scans the track for the highest decibel level. Displays "PEAK SEARCH" and locks the VU meters onto the peak.
+- **VU METERS**: Real-time Left and Right frequency analyzers. Can be toggled ON/OFF with the VU button.
 
-* **📊 VU METERS**: Real-time Left/Right frequency analyzers. Toggle ON/OFF using the **VU** button.
+- **VU SENSE (Hidden Panel)**
+  - Click the **VU SENSE** hatch to access sensitivity calibration.
+  - Adjust the multiplier to make meters more or less reactive.
 
-* **⚡ VU SENSE (Hidden Panel)**
+### 3. Playback Modes
 
-  * Click the **VU SENSE** hatch for sensitivity calibration.
-  * Adjust the multiplier to make meters more or less reactive to input.
+- **RANDOM**: Plays tracks in a non-linear, randomized order.
+- **REPEAT**
+  - **Repeat 1**: Loops the current track.
+  - **Repeat All**: Loops the entire disc.
 
-</details>
+- **A-B REPEAT**
+  1. Press A-B once to set the start point (A).
+  2. Press A-B again to set the end point (B).
+  3. The player will loop infinitely between these points.
+  4. Press a third time to clear the loop.
 
-<details>
-<summary>3️⃣ Playback Modes</summary>
+### 4. VFD Display and Navigation
 
-* **🎲 RANDOM**: Plays tracks in a randomized order.
+- **TIME MODE**: Toggles between Elapsed Time (Min:Sec) and Remaining Time (-Min:Sec).
+- **NUMERIC KEYPAD**: Direct track access. Type a number (e.g., 05) to jump instantly to that track.
+- **TRACK GRID**: Displays a 1–20 grid of tracks.
+  - **Blue color**: Track is loaded.
+  - **Red color**: Current active track.
+- **ALBUM ART**: Click the TRACK label on the VFD to view the embedded album art and full metadata (Artist, Album, Title).
 
-* **🔁 REPEAT**
+## How to Use
 
-  * **Repeat 1**: Loops the current track
-  * **Repeat All**: Loops the entire disc
+### Loading Music
 
-* **🔂 A-B REPEAT**
+1. Click the **POWER** or **OPEN-CLOSE** button to prepare the tray.
+2. Click the center of the tray (labeled **INSERT COMPACT DISC**).
+3. Select one or multiple audio files (MP3, WAV, or FLAC) from your computer.
+4. The player will automatically close the tray and begin reading the first track.
 
-  1. Press A-B once to set start point (A)
-  2. Press A-B again to set end point (B)
-  3. Player loops infinitely between A and B
-  4. Press a third time to clear the loop
+### Managing the Playlist
 
-</details>
+- **Quick Jump**: Use the Numeric Grid to type the track number.
+- **Visual List**: Click the Track Grid (numbers 1–20) to open a scrollable list of all loaded songs. Click any song in the list to play it.
 
-<details>
-<summary>4️⃣ VFD Display and Navigation</summary>
+### Preferences
 
-* **⏱ TIME MODE**: Toggle between Elapsed Time (Min:Sec) and Remaining Time (-Min:Sec)
-
-* **🔢 NUMERIC KEYPAD**: Type a track number (e.g., 05) to jump instantly
-
-* **📊 TRACK GRID**: 1–20 track display
-
-  * **Blue** → Track loaded
-  * **Red** → Current active track
-
-* **🖼 ALBUM ART**: Click the TRACK label to view embedded album art and metadata (Artist, Album, Title)
-
-</details>
-
----
-
-## 📂 How to Use
-
-<details>
-<summary>Loading Music</summary>
-
-1. Click **POWER** or **OPEN-CLOSE** to ready the tray.
-2. Click the tray center (**INSERT COMPACT DISC**).
-3. Select audio files (MP3, WAV, FLAC).
-4. The player closes the tray and begins reading the first track.
-
-</details>
-
-<details>
-<summary>Managing the Playlist</summary>
-
-* **Quick Jump**: Use the Numeric Grid to type a track number.
-* **Visual List**: Click the Track Grid (1–20) to open a scrollable list. Click any song to play.
-
-</details>
-
-<details>
-<summary>Preferences</summary>
-
-* Language (**English**) and Theme (**Dark Mode**) are saved in your browser.
-* **Tone Neutrality**: Bass/Treble reset to 0 dB (Neutral) upon restarting.
-
-</details>
-
----
-
-✅ This interface brings **authentic Technics SL-PS740A experience** to your browser, with realistic display, accurate VU meters, and full track control.
-
----
+- Language (**English**) and Theme (**Dark Mode**) preferences are automatically saved in your browser and persist across sessions.
+- **Tone Neutrality**: Bass and Treble settings reset to 0 dB (Neutral) upon restarting the application.
