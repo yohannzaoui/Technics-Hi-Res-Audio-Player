@@ -1,9 +1,6 @@
 ---
-title: "Technics SL-PS740A User Manual"
-description: "High-fidelity digital recreation of the Technics SL-PS740A CD player with VFD, VU meters, and advanced track management."
----
 
-# Technics SL-PS740A User Manual
+# Technics High Resolution Audio PLayer User Manual
 
 This digital interface is a high-fidelity recreation of the legendary Technics SL-PS740A Compact Disc player. It features a professional-grade Virtual Fluorescent Display (VFD), high-precision VU meters, and advanced track management.
 
