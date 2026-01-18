@@ -117,7 +117,8 @@ muteBtn.onclick = () => {
 };
 
 function startSearch(dir) {
-    if (!playlist.length || isPeakSearching) return;
+    // AJOUT : On bloque si la playlist est vide, si Peak Search est actif OU si A-B est actif
+    if (!playlist.length || isPeakSearching || isABActive()) return;
     
     if (!searchInterval && audio.playbackRate === 1.0) {
         volumeBeforeSearch = audio.volume;
@@ -125,11 +126,8 @@ function startSearch(dir) {
     }
 
     if (dir === 1) {
-        // AVANCE RAPIDE : Vitesse x4
         audio.playbackRate = 4.0; 
     } else {
-        // RETOUR RAPIDE SYNCHRONISÉ :
-        // Pour faire du x4, on doit reculer de 0.2s toutes les 50ms (0.2 / 0.05 = 4)
         if (searchInterval) clearInterval(searchInterval);
         searchInterval = setInterval(() => {
             audio.currentTime = Math.max(0, audio.currentTime - 0.2);
@@ -165,13 +163,15 @@ document.getElementById('rew-btn').onmouseup = stopSearch;
 document.getElementById('rew-btn').onmouseleave = stopSearch; // Sécurité si la souris sort du bouton
 
 document.getElementById('plus-10-btn').onclick = () => {
-    if (!playlist.length) return;
+    // AJOUT : "|| isABActive()"
+    if (!playlist.length || isABActive()) return; 
     audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
     updateTimeDisplay();
 };
 
 document.getElementById('minus-10-btn').onclick = () => {
-    if (!playlist.length) return;
+    // AJOUT : "|| isABActive()"
+    if (!playlist.length || isABActive()) return;
     audio.currentTime = Math.max(0, audio.currentTime - 10);
     updateTimeDisplay();
 };
