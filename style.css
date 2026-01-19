@@ -2,6 +2,9 @@
     --bg-black: #a5a5a5; /* backgound par defaut #a5a5a5*/
     --deck-gray: #1a1a1b;
     --vfd-blue: #40e0ff;
+    --vfd-green: #008000;
+    --vfd-yellow: #FFFF00;
+    --vfd-brown: #9F7E69;
     --vfd-glow: rgba(64, 224, 255, 0.5);
     --vfd-blue-dim: #003a4d;
     --vfd-off: #0a0a0a;
