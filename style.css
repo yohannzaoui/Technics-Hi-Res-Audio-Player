@@ -7,10 +7,14 @@
     --vfd-off: #0a0a0a;
     --vfd-red: #ff3333;
     --text-silver: #a0a0a0;
+    --text-beige: #b6b69f;
+    --text-gold: #7a6a0c;
     --text-white: #ffffff;
     --ui-font: 'Segoe UI', Tahoma, sans-serif;
     --digital-font: 'DS-Digital', sans-serif;
-    --brushed-metal: conic-gradient(from 0deg, #222 0deg, #444 45deg, #222 90deg, #444 135deg, #222 180deg, #444 225deg, #222 270deg, #444 315deg, #222 360deg);
+    --brushed-metal: conic-gradient(
+        from 0deg, #222 0deg, #444 45deg, #222 90deg, #444 135deg, #222 180deg, #444 225deg, #222 270deg, #444 315deg, #222 360deg
+        );
 }
 
 body {
@@ -285,7 +289,7 @@ body {
 }
 
 .btn { 
-    background: linear-gradient(145deg, #2a2a2b, #151516); 
+    background: linear-gradient(185deg, #2a2a2b, #151516); /* dégradé bouton */
     border: 1px solid #111; 
     color: var(--text-silver); 
     cursor: pointer; 
