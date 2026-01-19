@@ -39,7 +39,6 @@ function showVolumeDisplay() {
         timeLabel.innerText = "VOLUME";
         let volPerc = Math.round(audio.volume * 100); 
         if (volPerc > 99) volPerc = 99; 
-        
         const s = volPerc.toString().padStart(2, '0');
         document.getElementById('m-d1').innerText = " ";
         document.getElementById('m-d2').innerText = " ";
@@ -205,15 +204,12 @@ document.getElementById('ab-btn').onclick = () => {
 function isABActive() { return pointA !== null; }
 
 document.getElementById('power-reset-btn').onclick = () => {
-    audio.pause(); 
-    audio.src = ""; 
-    audio.removeAttribute('src'); 
+    audio.pause(); audio.src = ""; 
+    audio.removeAttribute('src');
     audio.volume = 0.02;
     playlist = []; currentIndex = 0; pointA = null; pointB = null; isMuted = false;
-    
     document.querySelectorAll('.vfd-indicator').forEach(el => el.classList.remove('active', 'vfd-input-blink'));
     document.getElementById('main-time-display').classList.remove('vfd-blink-pause');
-    
     updateDig('t', 0); updateGrid();
     document.getElementById('tray-front').classList.add('open');
     showVolumeDisplay();
@@ -233,8 +229,7 @@ document.getElementById('play-btn').onclick = () => {
 };
 
 document.getElementById('stop-btn').onclick = () => { 
-    audio.pause(); 
-    audio.currentTime = 0; 
+    audio.pause(); audio.currentTime = 0; 
     document.getElementById('main-time-display').classList.remove('vfd-blink-pause'); 
     updateTimeDisplay();
 };
@@ -282,6 +277,7 @@ function updateMediaSession() {
     }
 }
 
+// LOGIQUE DE CHARGEMENT PRINCIPALE
 function loadTrack(idx, forcePlay = false) {
     if (!playlist.length) return;
     const timeDisplay = document.getElementById('main-time-display');
@@ -300,7 +296,6 @@ function loadTrack(idx, forcePlay = false) {
     if (audio.src) URL.revokeObjectURL(audio.src);
     audio.src = URL.createObjectURL(currentFile);
     
-    // UI Update
     const formatDisplay = document.getElementById('file-format-display');
     if (formatDisplay && currentFile.name) {
         formatDisplay.innerText = currentFile.name.split('.').pop().toUpperCase();
@@ -308,14 +303,14 @@ function loadTrack(idx, forcePlay = false) {
     updateDig('t', currentIndex + 1);
     updateGrid(); 
 
-    // LOGIQUE DE LECTURE
-    // On joue si : forcePlay est vrai (auto-enchaînement) OU si c'est un disque neuf OU si on lisait déjà
+    // LOGIQUE DE LECTURE :
+    // On joue si : forcePlay (Auto-next) OU Reset Power OU On était déjà en lecture
     if (forcePlay || isAfterReset || wasPlaying) {
         audio.play().then(() => {
             timeDisplay.classList.remove('vfd-blink-pause');
         }).catch(e => console.log("Playback error:", e));
     } else {
-        // Reste en pause (cas du Next/Prev manuel alors qu'on était en Pause)
+        // Sinon (Next/Prev manuel en pause) -> On reste en pause
         audio.pause();
         audio.currentTime = 0;
         timeDisplay.classList.add('vfd-blink-pause');
@@ -337,11 +332,10 @@ if ('mediaSession' in navigator) {
 
 audio.onended = () => {
     if (isABActive()) return;
-    
     if (repeatMode === 1) {
         audio.play();
     } else if (repeatMode === 2 || isRandom || currentIndex < playlist.length - 1) {
-        // On force la lecture pour la piste suivante (forcePlay = true)
+        // On force la lecture (forcePlay = true) pour l'enchaînement automatique
         loadTrack(currentIndex + 1, true);
     } else {
         audio.pause();
@@ -349,15 +343,6 @@ audio.onended = () => {
         updateTimeDisplay();
     }
 };
-
-
-function loadTrackManual(idx, forcePlay) {
-    loadTrack(idx);
-    if (forcePlay) {
-        audio.play();
-        document.getElementById('main-time-display').classList.remove('vfd-blink-pause');
-    }
-}
 
 audio.ontimeupdate = () => {
     if (pointA !== null && pointB !== null && audio.currentTime >= pointB) audio.currentTime = pointA;
@@ -372,8 +357,7 @@ function handleNumKey(num) {
         updateDig('t', currentIndex + 1);
         tDisplay.classList.add('vfd-input-blink');
         setTimeout(() => tDisplay.classList.remove('vfd-input-blink'), 800);
-        inputBuffer = "";
-        return;
+        inputBuffer = ""; return;
     }
     inputBuffer += num;
     tDisplay.classList.add('vfd-input-blink');
@@ -416,10 +400,7 @@ function openPlaylist() {
         const item = document.createElement('div');
         item.className = 'track-item' + (idx === currentIndex ? ' active' : '');
         item.innerText = `${(idx + 1).toString().padStart(2, '0')}. ${file.name}`;
-        item.onclick = () => {
-            loadTrack(idx);
-            document.getElementById('playlist-modal').style.display = 'none';
-        };
+        item.onclick = () => { loadTrack(idx); document.getElementById('playlist-modal').style.display = 'none'; };
         container.appendChild(item);
     });
     document.getElementById('playlist-modal').style.display = 'flex';
@@ -436,13 +417,14 @@ document.getElementById('file-input').onchange = (e) => {
 
 document.getElementById('next-btn').onclick = () => {
     if (isABActive()) return;
-    loadTrack(currentIndex + 1); // Respecte l'état actuel
+    loadTrack(currentIndex + 1); // Pas de forcePlay, respecte l'état pause
 };
 
 document.getElementById('prev-btn').onclick = () => {
     if (isABActive()) return;
-    loadTrack(currentIndex - 1); // Respecte l'état actuel
+    loadTrack(currentIndex - 1); // Pas de forcePlay, respecte l'état pause
 };
+
 document.getElementById('eject-btn').onclick = () => document.getElementById('tray-front').classList.toggle('open');
 document.getElementById('random-btn').onclick = () => { 
     isRandom = !isRandom; 
