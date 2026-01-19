@@ -457,7 +457,7 @@ body {
     text-transform: uppercase; 
 }
 
-.vfd-indicator-red { 
+.vfd-indicator-ab-lock-red { 
     font-family: var(--ui-font); 
     font-size: 10px; 
     font-weight: bold; 
