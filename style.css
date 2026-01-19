@@ -214,7 +214,7 @@ body {
 
 .label-vfd { 
     font-size: 11px; 
-    color: var(--vfd-blue); 
+    color: var(--vfd-blue); /* couleur texte par défaut de l'afficheur */
     font-family: var(--ui-font); 
     font-weight: bold; 
     text-transform: uppercase; 
