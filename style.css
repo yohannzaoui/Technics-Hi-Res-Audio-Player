@@ -1,5 +1,5 @@
 :root {
-    --bg-black: #a5a5a5;
+    --bg-black: #a5a5a5; /* backgound par defaut #a5a5a5*/
     --deck-gray: #1a1a1b;
     --vfd-blue: #40e0ff;
     --vfd-glow: rgba(64, 224, 255, 0.5);
@@ -32,7 +32,7 @@ body {
     padding: 25px 120px 60px 120px; 
     border-top: 1px solid #cfcfcf;
     border-radius: 4px; 
-    box-shadow: 0 120px 150px rgb(49, 49, 49);
+    box-shadow: 0 200px 200px rgb(49, 49, 49);
     position: relative;
     z-index: 1;
 }
