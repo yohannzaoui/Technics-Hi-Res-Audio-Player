@@ -437,7 +437,8 @@ body {
 }
 
 .grid-num.loaded { 
-    color: #40e0ff; 
+    color: var(--vfd-blue); /* Remplace #40e0ff par la variable */
+    transition: color 0.3s ease; /* Optionnel : pour une transition douce lors du clic */
 }
 
 .grid-num.active-track { 
