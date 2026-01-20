@@ -643,3 +643,50 @@ function checkLock(e) {
     }
     return false; // Ce n'est pas bloqué
 }
+
+/**
+ * GESTION DES COULEURS VFD
+ */
+const vfdColors = [
+    '#40e0ff', // Blue (Original)
+    '#50ff7a', // Green
+    '#ffb84d', // Amber
+    '#ffffff', // White
+    '#a0a0a0', // Silver
+
+];
+
+let currentColorIndex = 0;
+
+// Fonction pour appliquer la couleur aux variables CSS
+function setGlobalVFDColor(color) {
+    const root = document.documentElement;
+    root.style.setProperty('--vfd-blue', color);
+    
+    // Crée une lueur (glow) assortie avec 40% d'opacité (hex + 66)
+    root.style.setProperty('--vfd-glow', color + '66');
+    
+    // Sauvegarde dans les préférences utilisateur
+    localStorage.setItem('technics-vfd-color', color);
+}
+
+// Initialisation au chargement
+window.addEventListener('DOMContentLoaded', () => {
+    const savedColor = localStorage.getItem('technics-vfd-color');
+    if (savedColor) {
+        setGlobalVFDColor(savedColor);
+        currentColorIndex = vfdColors.indexOf(savedColor);
+        if (currentColorIndex === -1) currentColorIndex = 0;
+    }
+});
+
+// Événement sur le logo
+document.getElementById('vfd-color-trigger').onclick = (e) => {
+    e.preventDefault(); // Empêche le comportement par défaut du lien
+    
+    // Passe à la couleur suivante
+    currentColorIndex = (currentColorIndex + 1) % vfdColors.length;
+    const nextColor = vfdColors[currentColorIndex];
+    
+    setGlobalVFDColor(nextColor);
+};
