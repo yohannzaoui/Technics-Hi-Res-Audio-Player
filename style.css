@@ -545,14 +545,14 @@ body {
 /* On cible le conteneur des boutons de volume */
 .controls-right-stack div[style*="display: flex"],
 .volume-controls-container {
-    margin-top: 10px; /* Augmente ce chiffre pour descendre plus bas */
+    margin-top: 50px; /* Augmente ce chiffre pour descendre plus bas */
 }
 
 
 /* Remplace .volume-label par la classe que tu utilises pour le texte "VOLUME" */
 .volume-label {
     display: block; /* S'assure que l'élément peut être déplacé */
-    transform: translateY(15px); /* Descend le mot de 15px vers le bas */
+    transform: translateY(50px); /* Descend le mot de 15px vers le bas */
 }
 
 .label-tiny {
@@ -721,7 +721,7 @@ body {
 
 .vu-sense-group {
     display: block;        /* Permet d'appliquer des marges correctement */
-    margin-top: 55px;      /* Ajuste cette valeur pour descendre le mot plus ou moins bas */
+    margin-top: 30px;      /* Ajuste cette valeur pour descendre le mot plus ou moins bas */
     margin-bottom: -10px;    /* Espace entre le mot et la trappe */
     transition: all 0.3s;  /* Optionnel : pour un mouvement fluide si tu le modifies */
 }
