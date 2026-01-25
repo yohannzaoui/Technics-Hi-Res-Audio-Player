@@ -872,7 +872,13 @@ body {
 
 /* Effet au survol ou quand le bouton est actif */
 .btn:hover i {
-    color: var(--vfd-blue); /* Les icônes s'illuminent en bleu VFD au survol */
+    color: var(--text-white); /* Les icônes s'illuminent en bleu VFD au survol */
+    text-shadow: 0 0 5px var(--vfd-glow);
+}
+
+/* Effet au survol ou quand le bouton est actif */
+.btn:hover {
+    color: var(--text-white); /* Les icônes s'illuminent en bleu VFD au survol */
     text-shadow: 0 0 5px var(--vfd-glow);
 }
 
