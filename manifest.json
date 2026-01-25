@@ -1,7 +1,7 @@
 {
-  "short_name": "Technics Hi-Res Player",
-  "name": "Technics Hi-Res Player",
-  "description": "Technics High Resolution Audio Player",
+  "short_name": "Technics Master Edition",
+  "name": "Technics Player",
+  "description": "Technics Master Edition",
   "icons": [
     {
       "src": "img/favicon.png",
