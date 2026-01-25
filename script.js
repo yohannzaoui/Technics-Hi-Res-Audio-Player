@@ -563,7 +563,8 @@ function checkLock(e) {
     return false;
 }
 
-const vfdColors = ['#40e0ff', '#ffffff', '#a0a0a0', '#50ff7a', '#FFF703'];
+const vfdColors = ['#40e0ff','#0b335e', '#FFF703','#ffffff', '#a0a0a0', '#a68e72','#50ff7a','#404f45'];
+
 let currentColorIndex = 0;
 
 function setGlobalVFDColor(color) {
